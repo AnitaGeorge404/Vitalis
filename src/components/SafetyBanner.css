@@ -1,0 +1,55 @@
+.safety-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  border-left: 4px solid;
+}
+
+.safety-banner.default {
+  background-color: rgba(59, 130, 246, 0.1);
+  border-left-color: #3b82f6;
+  color: #1e40af;
+}
+
+.safety-banner.emergency {
+  background-color: rgba(220, 38, 38, 0.1);
+  border-left-color: #dc2626;
+  color: #991b1b;
+}
+
+.safety-banner.health {
+  background-color: rgba(5, 150, 105, 0.1);
+  border-left-color: #059669;
+  color: #047857;
+}
+
+.safety-banner.cpr {
+  background-color: rgba(245, 158, 11, 0.1);
+  border-left-color: #f59e0b;
+  color: #d97706;
+}
+
+.banner-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.banner-text {
+  margin: 0;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .safety-banner {
+    font-size: 0.8rem;
+    padding: 0.6rem 0.85rem;
+  }
+
+  .banner-icon {
+    font-size: 1rem;
+  }
+}

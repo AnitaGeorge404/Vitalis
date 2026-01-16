@@ -1,4 +1,10 @@
+import { useState } from 'react'
 import FeatureCard from '../components/FeatureCard'
+import SafetyBanner from '../components/SafetyBanner'
+import PainScale from '../components/PainScale'
+import FollowUpReminder from '../components/FollowUpReminder'
+import SymptomHistory from '../components/SymptomHistory'
+import OfflineIndicator from '../components/OfflineIndicator'
 import '../styles/cards.css'
 
 /**
@@ -6,6 +12,8 @@ import '../styles/cards.css'
  * Displays all health-related features as cards
  */
 function HealthCheck() {
+  const [painLevel, setPainLevel] = useState(0)
+  const [currentCheck, setCurrentCheck] = useState(null)
   const healthFeatures = [
     {
       title: 'Wound Watch',
@@ -46,11 +54,36 @@ function HealthCheck() {
 
   return (
     <div className="page-container">
-      <div className="page-header health-header">
+      {/* Safety Disclaimer Banner */}
+      <SafetyBanner variant="health" />
+
+      <div className="page-header health-header" style={{ marginTop: '1rem' }}>
         <h1 className="page-title">🩺 Health Check Mode</h1>
         <p className="page-subtitle">
           Assess health situations and get guidance
         </p>
+      </div>
+
+      {/* Pain Assessment Tool */}
+      <div style={{ marginBottom: '2rem' }}>
+        <PainScale 
+          value={painLevel} 
+          onChange={setPainLevel}
+          showDescription={true}
+        />
+      </div>
+
+      {/* Follow-Up Reminder */}
+      <div style={{ marginBottom: '2rem' }}>
+        <FollowUpReminder />
+      </div>
+
+      {/* Symptom History Timeline */}
+      <div style={{ marginBottom: '2rem' }}>
+        <SymptomHistory 
+          currentCheck={currentCheck}
+          maxItems={10}
+        />
       </div>
 
       <div className="cards-grid">
@@ -64,6 +97,17 @@ function HealthCheck() {
           />
         ))}
       </div>
+
+      {/* Offline Indicator */}
+      <OfflineIndicator 
+        offlineFeatures={[
+          'Pain Scale',
+          'Symptom History',
+          'Follow-Up Reminders',
+          'Wound Watch',
+          'Burn Guide'
+        ]}
+      />
     </div>
   )
 }

@@ -1,15 +1,18 @@
-import FeatureCard from '../components/FeatureCard'
-import SafetyBanner from '../components/SafetyBanner'
-import EmergencyCallButton from '../components/EmergencyCallButton'
-import EmergencyNotes from '../components/EmergencyNotes'
-import OfflineIndicator from '../components/OfflineIndicator'
-import '../styles/cards.css'
-
 /**
- * Emergency Mode Page
- * Displays all emergency-related features as cards
+ * EXAMPLE: Enhanced Emergency Page
+ * 
+ * Shows how to add value-adding features to the Emergency mode landing page
  */
-function Emergency() {
+
+import { useState } from 'react';
+import FeatureCard from '../components/FeatureCard';
+import EmergencyCallButton from '../components/EmergencyCallButton';
+import EmergencyNotes from '../components/EmergencyNotes';
+import SafetyBanner from '../components/SafetyBanner';
+import OfflineIndicator from '../components/OfflineIndicator';
+import '../styles/cards.css';
+
+function EnhancedEmergencyPage() {
   const emergencyFeatures = [
     {
       title: 'CPR Coach',
@@ -38,7 +41,7 @@ function Emergency() {
     {
       title: 'Burn Help',
       description: 'Immediate burn assessment and first aid guidance',
-      icon: '�',
+      icon: '🔥',
       route: '/emergency/burn-help'
     },
     {
@@ -49,7 +52,7 @@ function Emergency() {
     },
     {
       title: 'Emergency AI Assistant',
-      description: 'Real-time emergency guidance chatbot for critical situations',
+      description: 'Real-time emergency guidance chatbot',
       icon: '🤖',
       route: '/emergency/chatbot'
     },
@@ -59,11 +62,11 @@ function Emergency() {
       icon: '🎤',
       route: '/emergency/voice-guidance'
     }
-  ]
+  ];
 
   return (
     <div className="page-container">
-      {/* Safety Disclaimer Banner */}
+      {/* Emergency banner */}
       <SafetyBanner variant="emergency" />
 
       <div className="page-header emergency-header" style={{ marginTop: '1rem' }}>
@@ -73,16 +76,17 @@ function Emergency() {
         </p>
       </div>
 
-      {/* One-Tap Emergency Call */}
+      {/* One-tap emergency call section */}
       <div style={{ marginBottom: '2rem' }}>
         <EmergencyCallButton emergencyNumber="911" />
       </div>
 
-      {/* Emergency Notes */}
+      {/* Emergency notes accessible from landing page */}
       <div style={{ marginBottom: '2rem' }}>
         <EmergencyNotes sessionId="emergency_main" />
       </div>
 
+      {/* Feature cards grid */}
       <div className="cards-grid">
         {emergencyFeatures.map((feature, index) => (
           <FeatureCard
@@ -95,7 +99,7 @@ function Emergency() {
         ))}
       </div>
 
-      {/* Offline Indicator */}
+      {/* Offline indicator */}
       <OfflineIndicator 
         offlineFeatures={[
           'CPR Coach',
@@ -106,7 +110,7 @@ function Emergency() {
         ]}
       />
     </div>
-  )
+  );
 }
 
-export default Emergency
+export default EnhancedEmergencyPage;

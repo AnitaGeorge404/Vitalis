@@ -3,6 +3,11 @@ import CameraFeed from './components/CameraFeed'
 import FeedbackPanel from './components/FeedbackPanel'
 import RhythmAssist from './components/RhythmAssist'
 import SetupGuide from './components/SetupGuide'
+import EmergencyTimer from '../components/EmergencyTimer'
+import ScreenWakeLock from '../components/ScreenWakeLock'
+import HapticFeedback from '../components/HapticFeedback'
+import SafetyBanner from '../components/SafetyBanner'
+import EmergencyNotes from '../components/EmergencyNotes'
 import './styles/CPRCoach.css'
 
 /**
@@ -16,6 +21,7 @@ function CPRCoach() {
   const [compressionCount, setCompressionCount] = useState(0)
   const [rhythmFeedback, setRhythmFeedback] = useState('')
   const [postureFeedback, setPostureFeedback] = useState('')
+  const [sessionId] = useState(() => `cpr_${Date.now()}`)
 
   const handlePostureUpdate = useCallback((isCorrect, feedback) => {
     setPostureCorrect(isCorrect)
@@ -48,6 +54,21 @@ function CPRCoach() {
 
   return (
     <div className="cpr-coach-container">
+      {/* Safety Disclaimer */}
+      <SafetyBanner variant="cpr" />
+
+      {/* Emergency Timer - tracks session duration */}
+      {isSessionActive && (
+        <div style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+          <EmergencyTimer cprActive={isSessionActive} />
+        </div>
+      )}
+
+      {/* Screen Wake Lock - prevents sleep */}
+      <ScreenWakeLock enabled={isSessionActive} />
+
+      {/* Haptic Feedback - vibrates with rhythm */}
+      <HapticFeedback enabled={isSessionActive} bpm={100} />
       <div className="cpr-header">
         <h1>🫀 CPR Coach</h1>
         <p className="cpr-subtitle">Real-time CPR guidance with AI-powered pose detection</p>
@@ -88,6 +109,13 @@ function CPRCoach() {
               🔄 End Session
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Emergency Notes for documentation */}
+      {isSessionActive && (
+        <div style={{ marginTop: '1.5rem' }}>
+          <EmergencyNotes sessionId={sessionId} />
         </div>
       )}
     </div>
