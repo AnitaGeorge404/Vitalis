@@ -30,7 +30,7 @@ function Emergency() {
       route: '/emergency/aed-finder'
     },
     {
-      title: 'Trauma Track',
+      title: 'Trauma Eye',
       description: 'Assessment and monitoring for traumatic injuries',
       icon: '🩹',
       route: '/emergency/trauma-track'
