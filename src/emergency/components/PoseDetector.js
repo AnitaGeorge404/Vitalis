@@ -17,13 +17,9 @@ class PoseDetector {
     if (this.isRunning) return;
 
     try {
-      console.log('[PoseDetector] Starting pose detection...');
-      
       // Dynamically import MediaPipe Pose
       const { Pose } = await import('@mediapipe/pose');
       const { Camera } = await import('@mediapipe/camera_utils');
-
-      console.log('[PoseDetector] MediaPipe loaded successfully');
 
       // Initialize Pose
       this.pose = new Pose({
@@ -41,8 +37,6 @@ class PoseDetector {
         minTrackingConfidence: 0.5
       });
 
-      console.log('[PoseDetector] Pose model configured');
-
       this.pose.onResults((results) => {
         this.drawResults(results);
         if (this.onResults) {
@@ -51,7 +45,6 @@ class PoseDetector {
       });
 
       // Initialize Camera
-      console.log('[PoseDetector] Initializing camera...');
       this.camera = new Camera(this.videoElement, {
         onFrame: async () => {
           if (this.pose && this.isRunning) {
@@ -64,14 +57,12 @@ class PoseDetector {
 
       this.isRunning = true;
       await this.camera.start();
-      console.log('[PoseDetector] Camera started! Video dimensions:', 
-                  this.videoElement.videoWidth, 'x', this.videoElement.videoHeight);
+      console.log('[PoseDetector] Camera started successfully');
     } catch (error) {
       console.error('[PoseDetector] Initialization error:', error);
-      console.error('[PoseDetector] Error details:', error.message, error.stack);
       // Fallback: Continue without pose detection
       this.isRunning = false;
-      throw error; // Re-throw so CPRCoach can handle it
+      throw error;
     }
   }
 
@@ -115,13 +106,12 @@ class PoseDetector {
         const x = landmark.x * canvas.width;
         const y = landmark.y * canvas.height;
 
-        // Draw larger, more visible landmarks
         ctx.beginPath();
-        ctx.arc(x, y, 8, 0, 2 * Math.PI); // Increased from 5 to 8
-        ctx.fillStyle = '#00ff00'; // Bright green
+        ctx.arc(x, y, 6, 0, 2 * Math.PI);
+        ctx.fillStyle = '#00ff00';
         ctx.fill();
         ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 3; // Increased from 2 to 3
+        ctx.lineWidth = 2;
         ctx.stroke();
       }
     });
@@ -140,8 +130,8 @@ class PoseDetector {
       [23, 24] // Hips
     ];
 
-    ctx.strokeStyle = '#00ff00'; // Bright green
-    ctx.lineWidth = 4; // Increased from 3 to 4
+    ctx.strokeStyle = '#00ff00';
+    ctx.lineWidth = 3;
 
     connections.forEach(([start, end]) => {
       const startLandmark = landmarks[start];

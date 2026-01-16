@@ -1,7 +1,10 @@
 /**
  * CPRAnalyzer: Analyzes pose landmarks for CPR posture and compression detection
- * Enforces correct CPR biomechanics with real-time feedback
- * OPTIMIZED: Better compression counting accuracy
+ * Enforces correct CPR biomechanics:
+ * 1. Arms must remain straight (elbow angle >= 160°)
+ * 2. Back must remain relatively straight (no excessive bending)
+ * 3. Compressions detected via shoulder vertical movement only
+ * 4. Hand position must be centered
  */
 class CPRAnalyzer {
   constructor(onPostureUpdate, onCompressionUpdate) {
@@ -12,36 +15,33 @@ class CPRAnalyzer {
     this.compressionCount = 0;
     this.lastShoulderY = null;
     this.isCompressing = false;
+    this.compressionStartTime = Date.now();
     this.compressionTimestamps = [];
-    this.peakShoulderY = null;
-    this.troughShoulderY = null;
+    this.peakShoulderY = null; // Track compression peak for cycle detection
+    this.troughShoulderY = null; // Track compression trough
 
-    // Posture validation
+    // Posture validation state
     this.isPostureValid = false;
     this.lastSpineAngle = null;
 
-    // Elbow state tracking with temporal smoothing
-    this.elbowStateHistory = [];
-    this.elbowStateHistorySize = 5; // Require 5 consecutive frames for state change
-    this.currentElbowState = 'GOOD';
-
-    // Smoothing filters
+    // Smoothing filter for landmarks (moving average)
     this.landmarkHistory = [];
     this.historySize = 5;
+
+    // Smoothing for shoulder Y position
     this.shoulderYHistory = [];
     this.shoulderYHistorySize = 3;
 
     // Audio feedback
     this.audioContext = null;
     this.lastAudioFeedbackTime = 0;
-    this.audioFeedbackCooldown = 3000;
+    this.audioFeedbackCooldown = 3000; // 3 seconds between audio warnings
 
-    // Thresholds - OPTIMIZED for better compression detection
-    this.ELBOW_ANGLE_GOOD = 155;        // Excellent form
-    this.ELBOW_ANGLE_ACCEPTABLE = 135;  // Still valid CPR
-    this.SPINE_ANGLE_CHANGE_THRESHOLD = 15;
-    this.COMPRESSION_THRESHOLD = 0.010; // LOWERED from 0.015 for better detection
-    this.HAND_POSITION_TOLERANCE = 0.1;
+    // Thresholds
+    this.ELBOW_ANGLE_THRESHOLD = 160; // Degrees
+    this.SPINE_ANGLE_CHANGE_THRESHOLD = 15; // Degrees
+    this.COMPRESSION_THRESHOLD = 0.015; // 1.5% of frame height
+    this.HAND_POSITION_TOLERANCE = 0.1; // 10% of frame width
 
     this.initAudio();
   }
@@ -54,48 +54,45 @@ class CPRAnalyzer {
     }
   }
 
+  /**
+   * Main analysis function called on each pose detection frame
+   */
   analyzePose(landmarks) {
+    // Apply smoothing filter
     const smoothedLandmarks = this.smoothLandmarks(landmarks);
 
-    // Evaluate posture components
+    // POSTURE VALIDATION LAYER (Highest Priority)
     const armPosture = this.checkArmStraightness(smoothedLandmarks);
     const spineStability = this.checkSpineStability(smoothedLandmarks);
     const handPosition = this.checkHandPosition(smoothedLandmarks);
 
-    // Update elbow state with temporal smoothing
-    this.updateElbowState(armPosture.elbowState);
-
-    // Spine stability is HARD GATE (biomechanically critical)
-    // Elbow is SOFT GUIDANCE (quality indicator)
-    const spineValid = spineStability.isStable;
-    const elbowAllowsCompression = this.currentElbowState !== 'BAD';
-
-    // Compression detection requires stable spine + acceptable elbow state
-    this.isPostureValid = spineValid && elbowAllowsCompression;
+    // Combine posture checks
+    this.isPostureValid = armPosture.isCorrect && spineStability.isStable;
 
     // Build comprehensive feedback
     let postureFeedback = '';
-    if (!spineStability.isStable) {
-      postureFeedback = '⚠ Keep your back straight - Use shoulders only!';
-    } else if (this.currentElbowState === 'BAD') {
-      postureFeedback = '⚠ Straighten your arms - Lock elbows!';
-    } else if (this.currentElbowState === 'ACCEPTABLE') {
-      postureFeedback = '⚡ Good! Try to lock elbows more';
+    if (!armPosture.isCorrect) {
+      postureFeedback = '⚠ Lock your elbows - Keep arms straight!';
+    } else if (!spineStability.isStable) {
+      postureFeedback = '⚠ Use your shoulders, not your back!';
     } else if (!handPosition.isCorrect) {
-      postureFeedback = '⚡ Adjust hands to center of chest';
+      postureFeedback = '⚠ Place both hands at center of chest';
     } else {
-      postureFeedback = '✓ Excellent form - Keep it up!';
+      postureFeedback = '✓ Perfect posture - Keep it up!';
     }
 
-    // Compression detection (shoulder-driven only)
-    if (spineValid) {
+    // COMPRESSION DETECTION (Only if posture is valid)
+    if (this.isPostureValid) {
       this.detectCompression(smoothedLandmarks);
     } else {
+      // Reset compression state when posture is invalid
       this.resetCompressionState();
     }
 
+    // Calculate compression rate
     const compressionRate = this.calculateCompressionRate();
 
+    // Update callbacks
     if (this.onPostureUpdate) {
       this.onPostureUpdate(this.isPostureValid, postureFeedback);
     }
@@ -104,12 +101,15 @@ class CPRAnalyzer {
       this.onCompressionUpdate(this.compressionCount, compressionRate);
     }
 
-    // Audio feedback only for critical errors (spine bending)
-    if (!spineStability.isStable) {
+    // Audio feedback for incorrect posture
+    if (!this.isPostureValid) {
       this.playAudioFeedback();
     }
   }
 
+  /**
+   * Smooth landmark data using moving average filter
+   */
   smoothLandmarks(landmarks) {
     this.landmarkHistory.push(landmarks);
     if (this.landmarkHistory.length > this.historySize) {
@@ -120,6 +120,7 @@ class CPRAnalyzer {
       return landmarks;
     }
 
+    // Average across history
     const smoothed = landmarks.map((landmark, index) => {
       let sumX = 0, sumY = 0, sumZ = 0;
       this.landmarkHistory.forEach(frame => {
@@ -141,20 +142,30 @@ class CPRAnalyzer {
     return smoothed;
   }
 
+  /**
+   * Calculate angle between three points (for elbow angle calculation)
+   */
   calculateAngle(point1, point2, point3) {
+    // Vector from point2 to point1
     const vector1 = {
       x: point1.x - point2.x,
       y: point1.y - point2.y
     };
 
+    // Vector from point2 to point3
     const vector2 = {
       x: point3.x - point2.x,
       y: point3.y - point2.y
     };
 
+    // Calculate dot product
     const dotProduct = vector1.x * vector2.x + vector1.y * vector2.y;
+
+    // Calculate magnitudes
     const magnitude1 = Math.sqrt(vector1.x ** 2 + vector1.y ** 2);
     const magnitude2 = Math.sqrt(vector2.x ** 2 + vector2.y ** 2);
+
+    // Calculate angle in radians, then convert to degrees
     const angleRadians = Math.acos(dotProduct / (magnitude1 * magnitude2));
     const angleDegrees = (angleRadians * 180) / Math.PI;
 
@@ -162,17 +173,21 @@ class CPRAnalyzer {
   }
 
   /**
-   * Check arm straightness with 3-tier classification
-   * Returns elbow state: GOOD, ACCEPTABLE, or BAD
+   * Check if arms are straight (elbow angle >= 160°)
+   * This ensures compressions are driven by shoulders, not arm bending
    */
   checkArmStraightness(landmarks) {
+    // Left arm: shoulder(11), elbow(13), wrist(15)
     const leftShoulder = landmarks[11];
     const leftElbow = landmarks[13];
     const leftWrist = landmarks[15];
+
+    // Right arm: shoulder(12), elbow(14), wrist(16)
     const rightShoulder = landmarks[12];
     const rightElbow = landmarks[14];
     const rightWrist = landmarks[16];
 
+    // Check visibility
     const minVisibility = 0.5;
     const leftVisible = leftShoulder?.visibility > minVisibility &&
                        leftElbow?.visibility > minVisibility &&
@@ -182,9 +197,13 @@ class CPRAnalyzer {
                         rightWrist?.visibility > minVisibility;
 
     if (!leftVisible && !rightVisible) {
-      return { elbowState: 'ACCEPTABLE', leftAngle: null, rightAngle: null };
+      return {
+        isCorrect: false,
+        feedback: 'Position yourself so arms are visible'
+      };
     }
 
+    // Calculate elbow angles
     let leftAngle = null;
     let rightAngle = null;
 
@@ -196,52 +215,30 @@ class CPRAnalyzer {
       rightAngle = this.calculateAngle(rightShoulder, rightElbow, rightWrist);
     }
 
-    // Use the worse of the two arms for classification
-    const worstAngle = Math.min(
-      leftAngle !== null ? leftAngle : 180,
-      rightAngle !== null ? rightAngle : 180
-    );
+    // Check if BOTH arms are straight
+    const leftStraight = leftAngle === null || leftAngle >= this.ELBOW_ANGLE_THRESHOLD;
+    const rightStraight = rightAngle === null || rightAngle >= this.ELBOW_ANGLE_THRESHOLD;
 
-    // Three-tier classification
-    let elbowState;
-    if (worstAngle >= this.ELBOW_ANGLE_GOOD) {
-      elbowState = 'GOOD';
-    } else if (worstAngle >= this.ELBOW_ANGLE_ACCEPTABLE) {
-      elbowState = 'ACCEPTABLE';
-    } else {
-      elbowState = 'BAD';
-    }
+    const isCorrect = leftStraight && rightStraight;
 
-    return { elbowState, leftAngle, rightAngle, worstAngle };
+    return {
+      isCorrect,
+      leftAngle,
+      rightAngle
+    };
   }
 
   /**
-   * Update elbow state with temporal smoothing
-   * Requires 5 consecutive frames to change state
+   * Check spine stability - detect excessive torso bending
+   * CPR compressions should come from shoulders, not from bending the back
    */
-  updateElbowState(newState) {
-    this.elbowStateHistory.push(newState);
-    
-    if (this.elbowStateHistory.length > this.elbowStateHistorySize) {
-      this.elbowStateHistory.shift();
-    }
-
-    // Only change state if all recent frames agree
-    if (this.elbowStateHistory.length === this.elbowStateHistorySize) {
-      const allSame = this.elbowStateHistory.every(state => state === newState);
-      
-      if (allSame) {
-        this.currentElbowState = newState;
-      }
-    }
-  }
-
   checkSpineStability(landmarks) {
     const leftShoulder = landmarks[11];
     const rightShoulder = landmarks[12];
     const leftHip = landmarks[23];
     const rightHip = landmarks[24];
 
+    // Check visibility
     const minVisibility = 0.5;
     const allVisible = leftShoulder?.visibility > minVisibility &&
                       rightShoulder?.visibility > minVisibility &&
@@ -252,6 +249,7 @@ class CPRAnalyzer {
       return { isStable: false };
     }
 
+    // Calculate midpoints
     const shoulderMidpoint = {
       x: (leftShoulder.x + rightShoulder.x) / 2,
       y: (leftShoulder.y + rightShoulder.y) / 2
@@ -262,23 +260,38 @@ class CPRAnalyzer {
       y: (leftHip.y + rightHip.y) / 2
     };
 
+    // Calculate angle of spine relative to vertical
+    // Vertical = 90° (straight down)
     const deltaX = shoulderMidpoint.x - hipMidpoint.x;
     const deltaY = shoulderMidpoint.y - hipMidpoint.y;
+    
+    // Angle from vertical (in degrees)
     const spineAngle = Math.abs(Math.atan2(deltaX, deltaY) * (180 / Math.PI));
 
+    // Initialize baseline
     if (this.lastSpineAngle === null) {
       this.lastSpineAngle = spineAngle;
       return { isStable: true, spineAngle };
     }
 
+    // Check if spine angle has changed significantly (indicating bending)
     const angleChange = Math.abs(spineAngle - this.lastSpineAngle);
     const isStable = angleChange < this.SPINE_ANGLE_CHANGE_THRESHOLD;
 
+    // Update baseline with smoothing
     this.lastSpineAngle = this.lastSpineAngle * 0.9 + spineAngle * 0.1;
 
-    return { isStable, spineAngle, angleChange };
+    return {
+      isStable,
+      spineAngle,
+      angleChange
+    };
   }
 
+  /**
+   * Check hand position - ensure hands are together at center
+   * We check if wrists are close together and centered below shoulders
+   */
   checkHandPosition(landmarks) {
     const leftWrist = landmarks[15];
     const rightWrist = landmarks[16];
@@ -292,52 +305,73 @@ class CPRAnalyzer {
                       rightShoulder?.visibility > minVisibility;
 
     if (!allVisible) {
-      return { isCorrect: true };
+      return { isCorrect: true }; // Don't penalize if not visible
     }
 
+    // Calculate wrist midpoint
     const wristMidpoint = {
       x: (leftWrist.x + rightWrist.x) / 2,
       y: (leftWrist.y + rightWrist.y) / 2
     };
 
+    // Calculate shoulder midpoint
     const shoulderMidpoint = {
       x: (leftShoulder.x + rightShoulder.x) / 2,
       y: (leftShoulder.y + rightShoulder.y) / 2
     };
 
+    // Check if wrists are close together (horizontal distance)
     const wristDistance = Math.abs(leftWrist.x - rightWrist.x);
     const wristsClose = wristDistance < this.HAND_POSITION_TOLERANCE;
 
+    // Check if wrist midpoint is roughly below shoulder midpoint (centered)
     const horizontalAlignment = Math.abs(wristMidpoint.x - shoulderMidpoint.x);
     const isCentered = horizontalAlignment < this.HAND_POSITION_TOLERANCE;
 
     const isCorrect = wristsClose && isCentered;
 
-    return { isCorrect, wristDistance, horizontalAlignment };
+    return {
+      isCorrect,
+      wristDistance,
+      horizontalAlignment
+    };
   }
 
+  /**
+   * Reset compression state when posture becomes invalid
+   */
   resetCompressionState() {
     this.isCompressing = false;
     this.peakShoulderY = null;
     this.troughShoulderY = null;
   }
 
+  /**
+   * Detect compressions based on shoulder vertical movement ONLY
+   * CRITICAL: Uses only shoulder Y-position, not torso or full-body movement
+   * Implements proper compression cycle detection with peak/trough tracking
+   */
   detectCompression(landmarks) {
+    // Use average of both shoulders for Y-position
     const leftShoulder = landmarks[11];
     const rightShoulder = landmarks[12];
 
     if (!leftShoulder || !rightShoulder) return;
 
+    // Calculate average shoulder Y position (lower Y = higher on screen)
     const avgShoulderY = (leftShoulder.y + rightShoulder.y) / 2;
 
+    // Apply smoothing to shoulder Y position
     this.shoulderYHistory.push(avgShoulderY);
     if (this.shoulderYHistory.length > this.shoulderYHistorySize) {
       this.shoulderYHistory.shift();
     }
 
+    // Calculate smoothed shoulder Y
     const smoothedShoulderY = this.shoulderYHistory.reduce((sum, val) => sum + val, 0) / 
                              this.shoulderYHistory.length;
 
+    // Initialize tracking
     if (this.lastShoulderY === null) {
       this.lastShoulderY = smoothedShoulderY;
       this.peakShoulderY = smoothedShoulderY;
@@ -347,39 +381,43 @@ class CPRAnalyzer {
 
     const deltaY = smoothedShoulderY - this.lastShoulderY;
 
+    // Track peaks (highest position = lowest Y value)
     if (smoothedShoulderY < this.peakShoulderY) {
       this.peakShoulderY = smoothedShoulderY;
     }
 
+    // Track troughs (lowest position = highest Y value)
     if (smoothedShoulderY > this.troughShoulderY) {
       this.troughShoulderY = smoothedShoulderY;
     }
 
-    // IMPROVED: Detect upward motion (compression phase)
+    // Downward movement - entering compression phase
     if (deltaY > this.COMPRESSION_THRESHOLD && !this.isCompressing) {
       this.isCompressing = true;
-      this.peakShoulderY = smoothedShoulderY;
+      this.peakShoulderY = smoothedShoulderY; // Reset peak for this cycle
     }
 
-    // IMPROVED: Detect downward motion (release phase) - count the compression
+    // Upward movement - completing compression cycle
     if (deltaY < -this.COMPRESSION_THRESHOLD && this.isCompressing) {
+      // Verify this was a significant compression
       const compressionDepth = this.troughShoulderY - this.peakShoulderY;
       
-      // Count compression if depth is meaningful (lowered threshold for better detection)
+      // Only count if compression was significant enough (at least 1.5% of frame)
       if (compressionDepth > this.COMPRESSION_THRESHOLD) {
         this.isCompressing = false;
         this.compressionCount++;
         this.compressionTimestamps.push(Date.now());
 
+        // Keep only recent compressions (last 10 seconds)
         const tenSecondsAgo = Date.now() - 10000;
         this.compressionTimestamps = this.compressionTimestamps.filter(
           timestamp => timestamp > tenSecondsAgo
         );
 
-        console.log(`[CPR] Compression #${this.compressionCount} detected (depth: ${compressionDepth.toFixed(4)})`);
-
+        // Reset trough for next cycle
         this.troughShoulderY = smoothedShoulderY;
       } else {
+        // Too small, likely noise - reset state
         this.isCompressing = false;
       }
     }
@@ -387,37 +425,46 @@ class CPRAnalyzer {
     this.lastShoulderY = smoothedShoulderY;
   }
 
+  /**
+   * Calculate compression rate in BPM
+   */
   calculateCompressionRate() {
     if (this.compressionTimestamps.length < 2) {
       return 0;
     }
 
+    // Calculate rate based on last 10 compressions or all available
     const recentCompressions = this.compressionTimestamps.slice(-10);
     const timeSpan = recentCompressions[recentCompressions.length - 1] - recentCompressions[0];
 
     if (timeSpan === 0) return 0;
 
+    // Compressions per millisecond * 60000 = compressions per minute
     const rate = ((recentCompressions.length - 1) / timeSpan) * 60000;
 
     return Math.round(rate);
   }
 
+  /**
+   * Play audio feedback for incorrect posture
+   */
   playAudioFeedback() {
     const now = Date.now();
     if (now - this.lastAudioFeedbackTime < this.audioFeedbackCooldown) {
-      return;
+      return; // Cooldown active
     }
 
     if (!this.audioContext) return;
 
     try {
+      // Create a simple beep
       const oscillator = this.audioContext.createOscillator();
       const gainNode = this.audioContext.createGain();
 
       oscillator.connect(gainNode);
       gainNode.connect(this.audioContext.destination);
 
-      oscillator.frequency.value = 800;
+      oscillator.frequency.value = 800; // Hz
       oscillator.type = 'sine';
 
       gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);

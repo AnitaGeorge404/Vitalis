@@ -1,0 +1,156 @@
+import React, { useEffect, useRef, useState } from 'react';
+import './RhythmAssist.css';
+
+/**
+ * RhythmAssist: CPR metronome at 110 BPM with visual and audio feedback
+ */
+function RhythmAssist({ postureCorrect, compressionRate, onRhythmFeedback, isActive }) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [beatCount, setBeatCount] = useState(0);
+  const audioContextRef = useRef(null);
+  const intervalRef = useRef(null);
+  const lastFeedbackTimeRef = useRef(0);
+
+  const TARGET_BPM = 110;
+  const BEAT_INTERVAL = (60 / TARGET_BPM) * 1000; // milliseconds per beat
+
+  // Initialize Web Audio API
+  useEffect(() => {
+    audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+    
+    return () => {
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+      }
+    };
+  }, []);
+
+  // Start/stop metronome
+  useEffect(() => {
+    const startMetronome = () => {
+      if (intervalRef.current) return;
+
+      intervalRef.current = setInterval(() => {
+        playBeep();
+        setBeatCount(prev => prev + 1);
+      }, BEAT_INTERVAL);
+    };
+
+    const stopMetronome = () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+
+    if (isPlaying && isActive) {
+      startMetronome();
+    } else {
+      stopMetronome();
+    }
+
+    return () => stopMetronome();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPlaying, isActive, BEAT_INTERVAL]);
+
+  // Provide rhythm feedback based on compression rate
+  useEffect(() => {
+    if (!postureCorrect || compressionRate === 0) {
+      return;
+    }
+
+    const now = Date.now();
+    // Provide feedback every 3 seconds
+    if (now - lastFeedbackTimeRef.current < 3000) {
+      return;
+    }
+
+    let feedback = '';
+    const rateDifference = compressionRate - TARGET_BPM;
+
+    if (Math.abs(rateDifference) <= 10) {
+      feedback = '🎯 Good rhythm! Keep it steady';
+    } else if (rateDifference > 10) {
+      feedback = '🐢 Slow down - You\'re pushing too fast';
+    } else {
+      feedback = '🚀 Push faster - Increase your rate';
+    }
+
+    if (onRhythmFeedback) {
+      onRhythmFeedback(feedback);
+    }
+
+    lastFeedbackTimeRef.current = now;
+  }, [compressionRate, postureCorrect, onRhythmFeedback, TARGET_BPM]);
+
+  const playBeep = () => {
+    if (!audioContextRef.current) return;
+
+    try {
+      const audioContext = audioContextRef.current;
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      // Higher pitched beep for metronome
+      oscillator.frequency.value = 1000; // Hz
+      oscillator.type = 'sine';
+
+      // Volume envelope
+      const now = audioContext.currentTime;
+      gainNode.gain.setValueAtTime(0.2, now);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+
+      oscillator.start(now);
+      oscillator.stop(now + 0.1);
+    } catch (error) {
+      console.error('Beep playback error:', error);
+    }
+  };
+
+  const toggleMetronome = () => {
+    setIsPlaying(prev => !prev);
+  };
+
+  return (
+    <div className="rhythm-assist">
+      <h2>🎵 Rhythm-Assist Metronome</h2>
+
+      <div className="target-display">
+        <div className="target-bpm">
+          <span className="label">Target:</span>
+          <span className="value">{TARGET_BPM} BPM</span>
+        </div>
+      </div>
+
+      <div className={`visual-pulse ${isPlaying ? 'active' : ''}`}>
+        <div className="pulse-circle"></div>
+        <div className="pulse-text">
+          {isPlaying ? '♪' : '○'}
+        </div>
+      </div>
+
+      <button 
+        className={`metronome-button ${isPlaying ? 'playing' : ''}`}
+        onClick={toggleMetronome}
+      >
+        {isPlaying ? '⏸ Pause Metronome' : '▶ Start Metronome'}
+      </button>
+
+      {isPlaying && (
+        <div className="beat-counter">
+          Beats: {beatCount}
+        </div>
+      )}
+
+      <div className="rhythm-info">
+        <p>💡 The metronome will help you maintain the correct compression rhythm.</p>
+        <p>📍 Compress on each beat for optimal CPR performance.</p>
+      </div>
+    </div>
+  );
+}
+
+export default RhythmAssist;

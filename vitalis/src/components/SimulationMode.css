@@ -1,0 +1,139 @@
+.simulation-mode {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.simulation-header {
+  background: linear-gradient(135deg, rgba(138, 43, 226, 0.3), rgba(75, 0, 130, 0.3));
+  border: 2px solid #9932cc;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.simulation-header h3 {
+  color: #ff00ff;
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+  text-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+}
+
+.simulation-note {
+  color: #ffd700;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.simulation-canvas-container {
+  position: relative;
+  width: 640px;
+  height: 480px;
+  background-color: #000;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  border: 3px solid #9932cc;
+}
+
+.simulation-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.scenario-selector {
+  background-color: rgba(0, 0, 0, 0.6);
+  border: 2px solid #4444ff;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.scenario-selector h4 {
+  color: #4444ff;
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.scenario-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.scenario-btn {
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  font-weight: bold;
+  background-color: rgba(68, 68, 255, 0.3);
+  color: #ffffff;
+  border: 2px solid #4444ff;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.scenario-btn:hover {
+  background-color: rgba(68, 68, 255, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(68, 68, 255, 0.4);
+}
+
+.scenario-btn.active {
+  background: linear-gradient(135deg, #00ff00, #008800);
+  border-color: #00ff00;
+  box-shadow: 0 0 20px rgba(0, 255, 0, 0.6);
+}
+
+.scenario-btn:active {
+  transform: translateY(0);
+}
+
+.simulation-info {
+  background-color: rgba(255, 165, 0, 0.2);
+  border: 2px solid #ffa500;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.simulation-info p {
+  color: #ffd700;
+  margin: 8px 0;
+  line-height: 1.6;
+}
+
+.simulation-info strong {
+  color: #ff8c00;
+}
+
+@media (max-width: 768px) {
+  .simulation-canvas-container {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+  }
+
+  .simulation-header h3 {
+    font-size: 1.2rem;
+  }
+
+  .simulation-note {
+    font-size: 0.9rem;
+  }
+
+  .scenario-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .scenario-btn {
+    font-size: 0.85rem;
+    padding: 10px 12px;
+  }
+
+  .simulation-info p {
+    font-size: 0.9rem;
+  }
+}

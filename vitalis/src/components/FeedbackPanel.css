@@ -1,0 +1,170 @@
+.feedback-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.feedback-panel h2 {
+  color: #ffd700;
+  font-size: 1.5rem;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.feedback-card {
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 12px;
+  padding: 20px;
+  border: 2px solid;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  transition: all 0.3s ease;
+}
+
+.feedback-icon {
+  font-size: 3rem;
+  flex-shrink: 0;
+}
+
+.feedback-content {
+  flex: 1;
+}
+
+.feedback-content h3 {
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+  color: #ffffff;
+}
+
+.feedback-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Posture Card States */
+.posture-card.neutral {
+  border-color: #888888;
+  background-color: rgba(50, 50, 50, 0.6);
+}
+
+.posture-card.correct {
+  border-color: #00ff00;
+  background: linear-gradient(135deg, rgba(0, 100, 0, 0.3), rgba(0, 50, 0, 0.3));
+  box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+}
+
+.posture-card.correct .feedback-text {
+  color: #00ff00;
+}
+
+.posture-card.incorrect {
+  border-color: #ff0000;
+  background: linear-gradient(135deg, rgba(100, 0, 0, 0.3), rgba(50, 0, 0, 0.3));
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+  animation: pulse-warning 2s infinite;
+}
+
+.posture-card.incorrect .feedback-text {
+  color: #ff4444;
+}
+
+@keyframes pulse-warning {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(255, 0, 0, 0.6);
+  }
+}
+
+/* Stats Card */
+.stats-card {
+  border-color: #4444ff;
+  background: linear-gradient(135deg, rgba(0, 0, 100, 0.3), rgba(0, 0, 50, 0.3));
+  flex-direction: row;
+  justify-content: space-around;
+  padding: 25px;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #4444ff;
+  text-shadow: 0 0 10px rgba(68, 68, 255, 0.5);
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: #cccccc;
+  margin-top: 5px;
+}
+
+/* Rhythm Card States */
+.rhythm-card {
+  border-color: #ffd700;
+  background: linear-gradient(135deg, rgba(100, 100, 0, 0.3), rgba(50, 50, 0, 0.3));
+}
+
+.rhythm-card.correct {
+  border-color: #00ff00;
+  background: linear-gradient(135deg, rgba(0, 100, 0, 0.3), rgba(0, 50, 0, 0.3));
+}
+
+.rhythm-card.correct .feedback-text {
+  color: #00ff00;
+}
+
+.rhythm-card.warning-fast,
+.rhythm-card.warning-slow {
+  border-color: #ffa500;
+  background: linear-gradient(135deg, rgba(100, 50, 0, 0.3), rgba(50, 25, 0, 0.3));
+}
+
+.rhythm-card.warning-fast .feedback-text,
+.rhythm-card.warning-slow .feedback-text {
+  color: #ffa500;
+}
+
+/* Priority Message */
+.priority-message {
+  background-color: rgba(255, 165, 0, 0.2);
+  border: 2px solid #ffa500;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  color: #ffd700;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .feedback-card {
+    padding: 15px;
+  }
+
+  .feedback-icon {
+    font-size: 2rem;
+  }
+
+  .feedback-content h3 {
+    font-size: 1rem;
+  }
+
+  .feedback-text {
+    font-size: 0.95rem;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+  }
+}

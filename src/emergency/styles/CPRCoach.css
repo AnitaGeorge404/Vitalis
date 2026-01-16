@@ -1,4 +1,10 @@
-/* CPR Coach - Control Panel Design */
+/* ============================================
+   CPR COACH - STEP-BASED DESIGN
+   Emergency UI: Command Interface Style
+   No scrolling, full-screen, sticky buttons
+   ============================================ */
+
+/* Container - Full Screen */
 .cpr-coach-container {
   max-width: 100%;
   margin: 0;
@@ -6,162 +12,585 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: var(--bg-dark);
-  color: var(--text-inverse);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: #ffffff;
   overflow: hidden;
 }
 
-/* Compact Header */
+/* Header - Compact with Progress */
 .cpr-header {
   flex-shrink: 0;
-  background-color: var(--bg-dark-secondary);
-  padding: var(--space-md) var(--space-lg);
-  border-bottom: 2px solid var(--emergency-red);
-  box-shadow: var(--shadow-md);
+  background-color: #0f3460;
+  padding: 1rem 1.5rem;
+  border-bottom: 3px solid #e94560;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 .cpr-header h1 {
-  font-size: var(--font-size-2xl);
-  color: var(--text-inverse);
+  font-size: 1.75rem;
+  color: #ffffff;
   margin: 0;
-  font-weight: var(--font-weight-bold);
+  font-weight: 700;
 }
 
-.cpr-subtitle {
-  font-size: var(--font-size-sm);
-  color: var(--text-tertiary);
-  margin: var(--space-xs) 0 0 0;
-  font-weight: var(--font-weight-normal);
+.cpr-progress {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #a8dadc;
+  font-weight: 500;
 }
 
-.disclaimer-banner {
-  flex-shrink: 0;
-  background: linear-gradient(135deg, var(--emergency-red) 0%, var(--emergency-red-hover) 100%);
-  color: var(--text-inverse);
-  padding: var(--space-sm) var(--space-lg);
-  font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-sm);
-  text-align: center;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-
-/* Main Content - Grid Layout */
-.cpr-main-content {
+/* Step Content - Flex Container */
+.cpr-step-content {
   flex: 1;
-  display: grid;
-  grid-template-columns: 1fr 400px;
-  gap: 0;
-  min-height: 0;
-  overflow: hidden;
-}
-
-/* Camera Section */
-.cpr-camera-section {
-  background-color: #000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-}
-
-/* Control Panel - Side Panel */
-.cpr-control-panel {
-  background-color: var(--bg-dark-secondary);
-  border-left: 2px solid var(--border-color-dark);
-  padding: var(--space-lg);
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
+  padding: 2rem;
   overflow-y: auto;
 }
 
-.cpr-control-panel::-webkit-scrollbar {
-  width: 6px;
+/* ============================================
+   STEP 0: IDLE SCREEN
+   ============================================ */
+.cpr-idle-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
 }
 
-.cpr-control-panel::-webkit-scrollbar-track {
-  background: var(--bg-dark);
+.idle-icon {
+  font-size: 5rem;
+  margin-bottom: 1rem;
+  animation: pulse 2s infinite;
 }
 
-.cpr-control-panel::-webkit-scrollbar-thumb {
-  background: var(--border-color-dark);
-  border-radius: var(--radius-sm);
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
 }
 
-.cpr-reset-button {
-  padding: var(--space-md) var(--space-lg);
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-bold);
-  background: linear-gradient(135deg, var(--warning-amber) 0%, #ea580c 100%);
-  color: var(--text-inverse);
-  border: none;
-  border-radius: var(--radius-md);
+.cpr-idle-screen h2 {
+  font-size: 2.5rem;
+  margin: 0 0 0.5rem 0;
+  color: #ffffff;
+}
+
+.idle-subtitle {
+  font-size: 1.125rem;
+  color: #a8dadc;
+  margin-bottom: 2rem;
+}
+
+.disclaimer-box {
+  background-color: rgba(233, 69, 96, 0.15);
+  border: 2px solid #e94560;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.disclaimer-box h3 {
+  margin: 0 0 1rem 0;
+  color: #e94560;
+  font-size: 1.125rem;
+}
+
+.disclaimer-box ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  line-height: 1.8;
+}
+
+.disclaimer-box li {
+  margin-bottom: 0.5rem;
+  color: #ffffff;
+}
+
+/* Demo Mode Toggle */
+.demo-toggle {
+  background-color: rgba(168, 218, 220, 0.1);
+  border: 2px solid #a8dadc;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.demo-toggle label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   cursor: pointer;
-  transition: all var(--transition-base);
-  box-shadow: var(--shadow-sm);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.demo-toggle input[type="checkbox"] {
+  width: 1.5rem;
+  height: 1.5rem;
+  cursor: pointer;
+}
+
+.demo-hint {
+  margin: 0.5rem 0 0 2.25rem;
+  font-size: 0.875rem;
+  color: #a8dadc;
+}
+
+/* ============================================
+   STEP 1: POSITIONING SCREEN
+   ============================================ */
+.positioning-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.positioning-screen h2 {
+  font-size: 2rem;
+  margin: 0 0 2rem 0;
+  text-align: center;
+  color: #ffffff;
+}
+
+.positioning-instructions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.instruction-card {
+  background-color: rgba(15, 52, 96, 0.6);
+  border: 2px solid #a8dadc;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.instruction-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.instruction-card h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  color: #ffffff;
+}
+
+.instruction-card p {
+  margin: 0;
+  color: #a8dadc;
+  font-size: 0.9375rem;
+}
+
+.camera-toggle {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.camera-hint {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.875rem;
+  color: #a8dadc;
+}
+
+.camera-preview {
+  background-color: #000;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  max-height: 400px;
+  overflow: hidden;
+}
+
+.error-text {
+  color: #e94560;
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 0.875rem;
+}
+
+/* ============================================
+   STEP 2: ACTIVE CPR SCREEN
+   ============================================ */
+.cpr-active-screen {
+  padding: 1rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.compression-counter-section {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.counter-label {
+  font-size: 1.125rem;
+  color: #a8dadc;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.counter-value {
+  font-size: 6rem;
+  font-weight: 800;
+  color: #e94560;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+}
+
+.counter-duration {
+  font-size: 1.5rem;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Visual Pulse Indicator */
+.visual-pulse {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  margin: 2rem auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pulse-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 4px solid #e94560;
+  border-radius: 50%;
+  background-color: rgba(233, 69, 96, 0.1);
+}
+
+.visual-pulse.pulsing .pulse-ring {
+  animation: pulse-ring 0.545s infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.pulse-text {
+  font-size: 3rem;
+  z-index: 1;
+}
+
+/* Active Feedback */
+.active-feedback {
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto 2rem auto;
+}
+
+/* Demo Indicator */
+.demo-indicator {
+  background-color: rgba(168, 218, 220, 0.2);
+  border: 2px solid #a8dadc;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin: 1rem auto;
+  max-width: 600px;
+  text-align: center;
+}
+
+.demo-indicator p {
+  margin: 0.25rem 0;
+  font-size: 0.9375rem;
+  color: #ffffff;
+}
+
+.demo-stats {
+  color: #a8dadc;
+  font-size: 0.875rem;
+}
+
+/* Rhythm Info */
+.rhythm-info {
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.rhythm-info p {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+  color: #a8dadc;
+}
+
+/* ============================================
+   STEP 3: SUMMARY SCREEN
+   ============================================ */
+.summary-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.summary-icon {
+  font-size: 5rem;
+  margin-bottom: 1rem;
+}
+
+.summary-screen h2 {
+  font-size: 2.5rem;
+  margin: 0 0 2rem 0;
+  color: #ffffff;
+}
+
+.summary-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background-color: rgba(15, 52, 96, 0.6);
+  border: 2px solid #a8dadc;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+}
+
+.stat-value {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #e94560;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #a8dadc;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.cpr-reset-button:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-  background: linear-gradient(135deg, #fb923c 0%, var(--warning-amber) 100%);
+.summary-message {
+  background-color: rgba(168, 218, 220, 0.15);
+  border: 2px solid #a8dadc;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  width: 100%;
 }
 
-.cpr-reset-button:active {
+.summary-message p {
+  margin: 0;
+  font-size: 1.125rem;
+  color: #ffffff;
+}
+
+.summary-notes {
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+/* ============================================
+   BUTTONS - PRIMARY & SECONDARY
+   ============================================ */
+.cpr-primary-button {
+  width: 100%;
+  max-width: 400px;
+  padding: 1.25rem 2rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #e94560 0%, #d63447 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  min-height: 64px;
+}
+
+.cpr-primary-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(233, 69, 96, 0.4);
+  background: linear-gradient(135deg, #ff6b81 0%, #e94560 100%);
+}
+
+.cpr-primary-button:active {
   transform: translateY(0);
 }
 
-/* Responsive Design */
-@media (max-width: 1200px) {
-  .cpr-main-content {
-    grid-template-columns: 1fr 320px;
-  }
-
-  .cpr-control-panel {
-    padding: var(--space-md);
-    gap: var(--space-md);
-  }
+.secondary-button {
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #a8dadc 0%, #457b9d 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  min-height: 64px;
 }
 
+.secondary-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 10px rgba(168, 218, 220, 0.4);
+  background: linear-gradient(135deg, #cfe8ef 0%, #a8dadc 100%);
+}
+
+.secondary-button:active {
+  transform: translateY(0);
+}
+
+/* Action Buttons - Sticky Bottom */
+.cpr-action-buttons {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(0deg, #1a1a2e 80%, transparent 100%);
+  padding: 1.5rem 2rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+
+.cpr-action-buttons button {
+  flex: 1;
+  min-width: 150px;
+  max-width: 250px;
+}
+
+.stop-button {
+  background: linear-gradient(135deg, #e94560 0%, #b03052 100%);
+}
+
+.stop-button:hover {
+  background: linear-gradient(135deg, #ff6b81 0%, #e94560 100%);
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
 @media (max-width: 768px) {
-  .cpr-main-content {
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr auto;
-  }
-
-  .cpr-control-panel {
-    max-height: 40vh;
-    border-left: none;
-    border-top: 2px solid var(--border-color-dark);
-  }
-
   .cpr-header h1 {
-    font-size: var(--font-size-xl);
+    font-size: 1.5rem;
   }
 
-  .cpr-subtitle {
-    font-size: var(--font-size-xs);
+  .cpr-step-content {
+    padding: 1rem;
   }
 
-  .disclaimer-banner {
-    font-size: var(--font-size-xs);
-    padding: var(--space-xs) var(--space-sm);
+  .counter-value {
+    font-size: 4rem;
+  }
+
+  .counter-duration {
+    font-size: 1.25rem;
+  }
+
+  .idle-icon {
+    font-size: 4rem;
+  }
+
+  .cpr-idle-screen h2 {
+    font-size: 2rem;
+  }
+
+  .positioning-instructions {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .cpr-action-buttons {
+    padding: 1rem;
   }
 }
 
 @media (max-width: 480px) {
   .cpr-header {
-    padding: var(--space-sm) var(--space-md);
+    padding: 0.75rem 1rem;
   }
 
   .cpr-header h1 {
-    font-size: var(--font-size-lg);
+    font-size: 1.25rem;
   }
 
-  .cpr-control-panel {
-    padding: var(--space-sm);
+  .counter-value {
+    font-size: 3rem;
   }
+
+  .cpr-primary-button {
+    font-size: 1rem;
+    padding: 1rem 1.5rem;
+  }
+
+  .secondary-button {
+    font-size: 0.875rem;
+    padding: 0.75rem 1.5rem;
+  }
+
+  .visual-pulse {
+    width: 120px;
+    height: 120px;
+  }
+
+  .pulse-text {
+    font-size: 2rem;
+  }
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+button:focus-visible {
+  outline: 3px solid #a8dadc;
+  outline-offset: 2px;
+}
+
+.cpr-coach-container * {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* High Contrast Text */
+.cpr-coach-container {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
