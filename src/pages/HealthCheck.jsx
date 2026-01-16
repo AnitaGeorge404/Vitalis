@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Bandage, Flame, Eye, Hospital, FileText } from 'lucide-react'
+import { Bandage, Flame, Eye, Hospital } from 'lucide-react'
 import FeatureCard from '../components/FeatureCard'
 import SafetyBanner from '../components/SafetyBanner'
 import SymptomHistory from '../components/SymptomHistory'
@@ -31,15 +31,9 @@ function HealthCheck() {
       route: '/health/respi-track'
     },
     {
-      title: 'Do I Need a Doctor? Checklist',
-      description: 'Evaluate symptoms and determine care level needed',
-      icon: Hospital,
-      route: '/health/doctor-checklist'
-    },
-    {
       title: 'Symptom Sieve',
-      description: 'Prepare organized health information for your visit',
-      icon: FileText,
+      description: 'Quick health assessment and symptom evaluation',
+      icon: Hospital,
       route: '/health/symptom-sieve'
     }
   ]
