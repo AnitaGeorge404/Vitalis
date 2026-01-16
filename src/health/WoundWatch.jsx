@@ -1,6 +1,8 @@
+import FollowUpReminder from '../components/FollowUpReminder'
+
 /**
  * Wound Watch Feature
- * Assess and track wound healing progress
+ * Assess and track wound healing progress with follow-up reminders
  */
 function WoundWatch() {
   return (
@@ -11,6 +13,11 @@ function WoundWatch() {
       </div>
       
       <div className="feature-content">
+        {/* Follow-Up Reminder for Wound Checks */}
+        <div style={{ marginBottom: '2rem' }}>
+          <FollowUpReminder context="wound" />
+        </div>
+
         <div className="feature-placeholder">
           <h2>Feature Coming Soon</h2>
           <p>This feature will help you:</p>

@@ -1,8 +1,8 @@
+import { Heart, FileText, MapPin, Activity, Phone, Bot } from 'lucide-react'
 import FeatureCard from '../components/FeatureCard'
 import SafetyBanner from '../components/SafetyBanner'
 import EmergencyCallButton from '../components/EmergencyCallButton'
 import EmergencyNotes from '../components/EmergencyNotes'
-import OfflineIndicator from '../components/OfflineIndicator'
 import '../styles/cards.css'
 
 /**
@@ -14,65 +14,56 @@ function Emergency() {
     {
       title: 'CPR Coach',
       description: 'Step-by-step CPR guidance with visual and audio cues',
-      icon: '🫀',
+      icon: Heart,
       route: '/emergency/cpr'
     },
     {
       title: 'Emergency Action Cards',
       description: 'Quick reference cards for various emergency situations',
-      icon: '📋',
+      icon: FileText,
       route: '/emergency/action-cards'
     },
     {
       title: 'Resource Locator',
       description: 'Find nearby AEDs and emergency facilities',
-      icon: '🏥',
+      icon: MapPin,
       route: '/emergency/aed-finder'
     },
     {
       title: 'Trauma Eye',
       description: 'Assessment and monitoring for traumatic injuries',
-      icon: '🩹',
+      icon: Activity,
       route: '/emergency/trauma-track'
-    },
-    {
-      title: 'Burn Help',
-      description: 'Immediate burn assessment and first aid guidance',
-      icon: '�',
-      route: '/emergency/burn-help'
     },
     {
       title: 'Smart Emergency Contacts',
       description: 'Quick alert system for emergency contacts',
-      icon: '📞',
+      icon: Phone,
       route: '/emergency/contacts'
     },
     {
       title: 'Emergency AI Assistant',
       description: 'Real-time emergency guidance chatbot for critical situations',
-      icon: '🤖',
+      icon: Bot,
       route: '/emergency/chatbot'
     }
   ]
 
   return (
     <div className="page-container">
-      {/* Safety Disclaimer Banner */}
       <SafetyBanner variant="emergency" />
 
       <div className="page-header emergency-header" style={{ marginTop: '1rem' }}>
-        <h1 className="page-title">🚨 Emergency Mode</h1>
+        <h1 className="page-title">Emergency Mode</h1>
         <p className="page-subtitle">
           Quick access to life-saving tools and guidance
         </p>
       </div>
 
-      {/* One-Tap Emergency Call */}
       <div style={{ marginBottom: '2rem' }}>
         <EmergencyCallButton emergencyNumber="911" />
       </div>
 
-      {/* Emergency Notes */}
       <div style={{ marginBottom: '2rem' }}>
         <EmergencyNotes sessionId="emergency_main" />
       </div>
@@ -88,17 +79,6 @@ function Emergency() {
           />
         ))}
       </div>
-
-      {/* Offline Indicator */}
-      <OfflineIndicator 
-        offlineFeatures={[
-          'CPR Coach',
-          'Emergency Timer',
-          'Emergency Notes',
-          'Burn Help',
-          'Trauma Track'
-        ]}
-      />
     </div>
   )
 }

@@ -1,0 +1,493 @@
+/* Burn Help Styles */
+.burn-help-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.burn-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.burn-header h1 {
+  font-size: 3rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.burn-subtitle {
+  font-size: 1.3rem;
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+}
+
+.critical-warning {
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  color: white;
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  box-shadow: var(--shadow-lg);
+  margin: 0 auto;
+  max-width: 900px;
+}
+
+.warning-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.warning-text strong {
+  display: block;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.warning-text ul {
+  margin: 0.5rem 0 0 1.5rem;
+  line-height: 1.8;
+}
+
+.warning-text li {
+  margin: 0.3rem 0;
+}
+
+/* Burn Degrees Grid */
+.burn-degrees-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.burn-degree-card {
+  background-color: var(--bg-primary);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  cursor: pointer;
+  transition: var(--transition);
+  border-left: 5px solid;
+}
+
+.burn-degree-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+}
+
+.burn-degree-card.selected {
+  box-shadow: 0 0 0 3px var(--primary-emergency);
+  transform: translateY(-5px);
+}
+
+.degree-header {
+  padding: 1.5rem;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.degree-header h2 {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.severity-badge {
+  background-color: rgba(255, 255, 255, 0.3);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.degree-content {
+  padding: 1.5rem;
+}
+
+.degree-content h3 {
+  font-size: 1.2rem;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.symptoms-section ul,
+.examples-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.symptoms-section li,
+.examples-section li {
+  padding: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+  line-height: 1.6;
+}
+
+.symptoms-section li:before {
+  content: "●";
+  position: absolute;
+  left: 0;
+  color: var(--primary-emergency);
+}
+
+.examples-section li:before {
+  content: "▸";
+  position: absolute;
+  left: 0;
+  color: var(--primary-health);
+}
+
+.treatment-section {
+  margin-top: 1.5rem;
+}
+
+.treatment-steps {
+  list-style: none;
+  counter-reset: treatment-counter;
+  padding: 0;
+}
+
+.treatment-steps li {
+  counter-increment: treatment-counter;
+  padding: 0.75rem;
+  padding-left: 2.5rem;
+  position: relative;
+  background-color: var(--bg-secondary);
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  line-height: 1.6;
+}
+
+.treatment-steps li:before {
+  content: counter(treatment-counter);
+  position: absolute;
+  left: 0.75rem;
+  top: 0.75rem;
+  background: linear-gradient(135deg, var(--primary-health) 0%, #047857 100%);
+  color: white;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.burn-warning {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border-left: 4px solid;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.burn-warning strong {
+  display: block;
+  font-size: 1.1rem;
+}
+
+/* Assessment Tools */
+.burn-assessment-tools {
+  background-color: var(--bg-secondary);
+  padding: 2rem;
+  border-radius: var(--radius);
+  margin-bottom: 3rem;
+}
+
+.burn-assessment-tools h2 {
+  font-size: 2rem;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.assessment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.assessment-card {
+  background-color: var(--bg-primary);
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.assessment-card h3 {
+  font-size: 1.3rem;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.palm-size-info {
+  background-color: var(--bg-secondary);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.palm-size-info p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.size-input {
+  margin-top: 1rem;
+}
+
+.size-input label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.size-input input,
+.assessment-card select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: var(--transition);
+}
+
+.size-input input:focus,
+.assessment-card select:focus {
+  outline: none;
+  border-color: var(--primary-emergency);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.size-warning {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 2px solid #f59e0b;
+  color: #92400e;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+  font-weight: 600;
+}
+
+.location-critical {
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.location-critical p {
+  margin: 0.3rem 0;
+}
+
+/* General Care Guidelines */
+.general-burn-care {
+  margin-bottom: 3rem;
+}
+
+.general-burn-care h2 {
+  font-size: 2rem;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.care-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+}
+
+.care-do,
+.care-dont {
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+}
+
+.care-do {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border: 3px solid #10b981;
+}
+
+.care-dont {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border: 3px solid #dc2626;
+}
+
+.do-header {
+  color: #047857;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.dont-header {
+  color: #991b1b;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.care-do ul,
+.care-dont ul {
+  list-style: none;
+  padding: 0;
+}
+
+.care-do li,
+.care-dont li {
+  padding: 0.75rem;
+  padding-left: 2rem;
+  position: relative;
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+}
+
+.care-do li:before {
+  content: "✓";
+  position: absolute;
+  left: 0.75rem;
+  color: #10b981;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.care-dont li:before {
+  content: "✗";
+  position: absolute;
+  left: 0.75rem;
+  color: #dc2626;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+/* Special Burns */
+.special-burns {
+  margin-bottom: 3rem;
+}
+
+.special-burns h2 {
+  font-size: 2rem;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.special-burn-card {
+  background-color: var(--bg-primary);
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  margin-bottom: 1.5rem;
+  border-left: 5px solid;
+}
+
+.special-burn-card.electrical {
+  border-left-color: #eab308;
+  background: linear-gradient(135deg, #fef9c3 0%, #fef3c7 100%);
+}
+
+.special-burn-card.chemical {
+  border-left-color: #8b5cf6;
+  background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+}
+
+.special-burn-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.special-burn-card p {
+  font-weight: 700;
+  color: var(--primary-emergency);
+  margin-bottom: 1rem;
+}
+
+.special-burn-card ul {
+  list-style: none;
+  padding: 0;
+}
+
+.special-burn-card li {
+  padding: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+  line-height: 1.6;
+}
+
+.special-burn-card li:before {
+  content: "⚠";
+  position: absolute;
+  left: 0;
+  color: var(--primary-emergency);
+}
+
+/* Disclaimer */
+.burn-disclaimer {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 2px solid #f59e0b;
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.burn-disclaimer p {
+  margin: 0;
+  color: #92400e;
+  line-height: 1.8;
+}
+
+.burn-disclaimer strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .burn-help-container {
+    padding: 1rem;
+  }
+
+  .burn-header h1 {
+    font-size: 2rem;
+  }
+
+  .burn-subtitle {
+    font-size: 1rem;
+  }
+
+  .critical-warning {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .burn-degrees-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .assessment-grid,
+  .care-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .degree-header {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+}

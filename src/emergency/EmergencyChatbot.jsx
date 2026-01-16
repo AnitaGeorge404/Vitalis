@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { Bot, User, Send, AlertCircle } from 'lucide-react'
 import './EmergencyChatbot.css'
 
 /**
@@ -9,7 +10,7 @@ function EmergencyChatbot() {
   const [messages, setMessages] = useState([
     {
       type: 'bot',
-      text: '🚨 Emergency AI ready. Ask ANY emergency question - get INSTANT, CRITICAL-ONLY guidance.\n\nExamples:\n• "Gunshot wound abdomen"\n• "Child swallowed bleach"\n• "Seizure happening now"\n• "Severe bleeding won\'t stop"\n\nFast, concise answers. No fluff.',
+      text: 'Emergency AI ready. Ask any emergency question for instant, critical-only guidance.\n\nExamples:\n• Gunshot wound abdomen\n• Child swallowed bleach\n• Seizure happening now\n• Severe bleeding won\'t stop\n\nFast, concise answers.',
       timestamp: new Date()
     }
   ])
@@ -84,12 +85,12 @@ function EmergencyChatbot() {
   }
 
   const quickActions = [
-    { label: '🫀 CPR Help', query: 'Person not breathing, how do I perform CPR?' },
-    { label: '🩸 Gunshot/Stab', query: 'A bullet went through person\'s abdomen, what to do?' },
-    { label: '🫁 Choking', query: 'Someone is choking and can\'t breathe' },
-    { label: '🔥 Severe Burn', query: 'Person has severe burns, what immediate actions?' },
-    { label: '⚡ Seizure', query: 'Someone is having a seizure right now' },
-    { label: '☠️ Poisoning', query: 'Child swallowed household chemical' }
+    { label: 'CPR Help', query: 'Person not breathing, how do I perform CPR?' },
+    { label: 'Gunshot/Stab', query: 'A bullet went through person\'s abdomen, what to do?' },
+    { label: 'Choking', query: 'Someone is choking and can\'t breathe' },
+    { label: 'Severe Burn', query: 'Person has severe burns, what immediate actions?' },
+    { label: 'Seizure', query: 'Someone is having a seizure right now' },
+    { label: 'Poisoning', query: 'Child swallowed household chemical' }
   ]
 
   const handleQuickAction = (query) => {
@@ -101,13 +102,13 @@ function EmergencyChatbot() {
     <div className="chatbot-container">
       <div className="chatbot-header">
         <div className="header-content">
-          <h1>🤖 Emergency AI Assistant</h1>
+          <h1>Emergency AI Assistant</h1>
           <p className="chatbot-subtitle">
-            ⚡ FAST & CONCISE - Critical info only, no fluff
+            Fast & Concise - Critical info only
           </p>
         </div>
         <div className="emergency-banner">
-          ⚠️ For life-threatening emergencies, CALL 911 FIRST, then use this assistant
+          <AlertCircle size={18} /> For life-threatening emergencies, CALL 911 FIRST
         </div>
       </div>
 
@@ -119,7 +120,7 @@ function EmergencyChatbot() {
               className={`message ${message.type === 'user' ? 'user-message' : 'bot-message'}`}
             >
               <div className="message-avatar">
-                {message.type === 'user' ? '👤' : '🤖'}
+                {message.type === 'user' ? <User size={20} /> : <Bot size={20} />}
               </div>
               <div className="message-content">
                 <div className="message-text">
@@ -136,7 +137,7 @@ function EmergencyChatbot() {
           
           {isTyping && (
             <div className="message bot-message">
-              <div className="message-avatar">🤖</div>
+              <div className="message-avatar"><Bot size={20} /></div>
               <div className="message-content">
                 <div className="typing-indicator">
                   <span></span>
@@ -151,7 +152,7 @@ function EmergencyChatbot() {
         </div>
 
         <div className="quick-actions">
-          <p className="quick-actions-label">🚨 Quick Emergency Help:</p>
+          <p className="quick-actions-label">Quick Emergency Help:</p>
           <div className="quick-actions-buttons">
             {quickActions.map((action, index) => (
               <button
@@ -169,7 +170,7 @@ function EmergencyChatbot() {
           <textarea
             ref={inputRef}
             className="message-input"
-            placeholder="Describe ANY emergency situation..."
+            placeholder="Describe emergency situation..."
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
@@ -181,16 +182,20 @@ function EmergencyChatbot() {
             onClick={handleSendMessage}
             disabled={!inputMessage.trim() || isTyping}
           >
-            {isTyping ? 'Getting help...' : 'Send →'}
+            {isTyping ? 'Getting help...' : (
+              <>
+                <Send size={18} /> Send
+              </>
+            )}
           </button>
         </div>
       </div>
 
       <div className="chatbot-disclaimer">
         <p>
-          ⚠️ <strong>Medical Disclaimer:</strong> This AI assistant provides general emergency guidance only.
+          <AlertCircle size={16} /> <strong>Medical Disclaimer:</strong> This AI assistant provides general emergency guidance only.
           It is NOT a substitute for professional medical care. Always call 911 for emergencies.
-          <span> 🤖 <strong>Powered by Google Gemini AI</strong> - Fast, concise, critical-only guidance.</span>
+          <span> <strong>Powered by Google Gemini AI</strong> - Fast, concise, critical-only guidance.</span>
         </p>
       </div>
     </div>

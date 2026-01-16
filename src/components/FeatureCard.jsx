@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { ChevronRight } from 'lucide-react'
 
 /**
  * FeatureCard Component
@@ -6,10 +7,10 @@ import { useNavigate } from 'react-router-dom'
  * 
  * @param {string} title - Feature title
  * @param {string} description - Feature description
- * @param {string} icon - Emoji or icon to display
+ * @param {Component} icon - Lucide React icon component
  * @param {string} route - Route to navigate to when clicked
  */
-function FeatureCard({ title, description, icon, route }) {
+function FeatureCard({ title, description, icon: Icon, route }) {
   const navigate = useNavigate()
 
   const handleClick = () => {
@@ -18,10 +19,14 @@ function FeatureCard({ title, description, icon, route }) {
 
   return (
     <div className="feature-card" onClick={handleClick}>
-      <div className="card-icon">{icon}</div>
+      <div className="card-icon">
+        {Icon && <Icon size={32} strokeWidth={1.5} />}
+      </div>
       <h3 className="card-title">{title}</h3>
       <p className="card-description">{description}</p>
-      <div className="card-arrow">→</div>
+      <div className="card-arrow">
+        <ChevronRight size={20} />
+      </div>
     </div>
   )
 }

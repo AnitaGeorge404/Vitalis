@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
+import { Home, AlertCircle, Heart, Activity } from 'lucide-react'
 
 /**
  * Navbar Component
@@ -11,7 +12,7 @@ function Navbar() {
     <nav className="navbar">
       <div className="nav-container">
         <Link to="/" className="nav-brand">
-          <span className="brand-icon">🏥</span>
+          <Activity size={24} strokeWidth={2} />
           Vitalis
         </Link>
         
@@ -20,19 +21,22 @@ function Navbar() {
             to="/" 
             className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
           >
+            <Home size={18} />
             Home
           </Link>
           <Link 
             to="/emergency" 
             className={`nav-link ${location.pathname.startsWith('/emergency') ? 'active' : ''}`}
           >
-            🚨 Emergency
+            <AlertCircle size={18} />
+            Emergency
           </Link>
           <Link 
             to="/health" 
             className={`nav-link ${location.pathname.startsWith('/health') ? 'active' : ''}`}
           >
-            🩺 Health Check
+            <Heart size={18} />
+            Health Check
           </Link>
         </div>
       </div>
