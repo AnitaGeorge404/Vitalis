@@ -30,6 +30,11 @@ function HealthCheck() {
       description: 'Prepare organized health information for your visit',
       icon: '📝',
       route: '/health/doctor-prep'
+    },{
+      title: 'Symptom Sieve',
+      description: 'Prepare organized health information for your visit',
+      icon: '📝',
+      route: '/health/symptom-sieve'
     }
   ]
 

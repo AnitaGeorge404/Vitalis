@@ -18,6 +18,7 @@ import WoundWatchHealth from './health/WoundWatch'
 import BurnGuide from './health/BurnGuide'
 import DoctorChecklist from './health/DoctorChecklist'
 import DoctorPrep from './health/DoctorPrep'
+import SymptomSieve from './health/SymptomSieve'
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
           <Route path="/health/burn-guide" element={<BurnGuide />} />
           <Route path="/health/doctor-checklist" element={<DoctorChecklist />} />
           <Route path="/health/doctor-prep" element={<DoctorPrep />} />
+          <Route path="/health/symptom-sieve"element={<SymptomSieve/>} />
         </Routes>
       </Layout>
     </Router>
