@@ -61,7 +61,7 @@ function Emergency() {
       </div>
 
       <div className="compact-section">
-        <EmergencyCallButton emergencyNumber="911" />
+        <EmergencyCallButton emergencyNumber="7736502910" />
       </div>
 
       <div className="compact-section">
