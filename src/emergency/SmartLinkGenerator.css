@@ -1,0 +1,532 @@
+/* Smart-Link Generator Modal Styles */
+
+.smart-link-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.smart-link-modal {
+  background: white;
+  border-radius: 16px;
+  max-width: 700px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+/* Header */
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+  border-bottom: 2px solid #e5e7eb;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.modal-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.modal-title h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.close-button {
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Content */
+.modal-content {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Trauma Preview */
+.trauma-preview {
+  background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+  border: 2px solid #f59e0b;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.trauma-preview h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  color: #92400e;
+}
+
+.trauma-preview-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 14px;
+  color: #78350f;
+}
+
+/* Form Sections */
+.form-section {
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.form-section:last-of-type {
+  border-bottom: none;
+}
+
+.form-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.form-group select,
+.form-group input {
+  padding: 10px 12px;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.form-group select:focus,
+.form-group input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+/* Quick Symptoms */
+.quick-symptoms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.quick-symptom-btn {
+  padding: 8px 12px;
+  background: #f3f4f6;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quick-symptom-btn:hover:not(:disabled) {
+  background: #667eea;
+  border-color: #667eea;
+  color: white;
+}
+
+.quick-symptom-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Symptom Input Row */
+.symptom-input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.symptom-input-row input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.symptom-input-row select {
+  padding: 10px 12px;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  min-width: 120px;
+}
+
+.symptom-input-row button {
+  padding: 10px 20px;
+  background: #667eea;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.symptom-input-row button:hover:not(:disabled) {
+  background: #5568d3;
+}
+
+.symptom-input-row button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Symptoms List Preview */
+.symptoms-list-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.symptom-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.symptom-tag.high {
+  background: #fee2e2;
+  border: 2px solid #dc2626;
+  color: #7f1d1d;
+}
+
+.symptom-tag.moderate {
+  background: #fef3c7;
+  border: 2px solid #f59e0b;
+  color: #78350f;
+}
+
+.symptom-tag.low {
+  background: #d1fae5;
+  border: 2px solid #10b981;
+  color: #064e3b;
+}
+
+.symptom-tag button {
+  background: none;
+  border: none;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  color: inherit;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.symptom-tag button:hover {
+  opacity: 1;
+}
+
+/* Checkbox Group */
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 12px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.checkbox-label:hover {
+  background: #f3f4f6;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #667eea;
+}
+
+.checkbox-label span {
+  font-size: 15px;
+  font-weight: 500;
+  color: #374151;
+}
+
+/* Error Banner */
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #fee2e2;
+  border: 2px solid #dc2626;
+  border-radius: 8px;
+  color: #7f1d1d;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+/* Generate Button */
+.generate-button {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.generate-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+}
+
+.generate-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Generated Link Display */
+.generated-link-display {
+  text-align: center;
+}
+
+.success-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+}
+
+.generated-link-display h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 24px 0;
+}
+
+.triage-badge-preview {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  font-size: 24px;
+  font-weight: 800;
+  color: white;
+  margin: 0 auto 16px;
+  border: 4px solid white;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  text-transform: uppercase;
+}
+
+.triage-badge-preview.red {
+  background: #dc2626;
+}
+
+.triage-badge-preview.orange {
+  background: #ea580c;
+}
+
+.triage-badge-preview.yellow {
+  background: #ca8a04;
+}
+
+.triage-badge-preview.green {
+  background: #16a34a;
+}
+
+.triage-explanation-preview {
+  font-size: 15px;
+  color: #6b7280;
+  line-height: 1.6;
+  margin-bottom: 24px;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+/* Link Box */
+.link-box {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.link-input {
+  flex: 1;
+  padding: 14px;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'Courier New', monospace;
+  color: #374151;
+  background: #f9fafb;
+}
+
+.copy-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 20px;
+  background: #667eea;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.copy-button:hover {
+  background: #5568d3;
+}
+
+.copy-button.copied {
+  background: #10b981;
+}
+
+/* Link Info */
+.link-info {
+  background: #f3f4f6;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.link-info p {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #374151;
+}
+
+/* New Link Button */
+.new-link-button {
+  padding: 12px 24px;
+  background: transparent;
+  border: 2px solid #667eea;
+  border-radius: 8px;
+  color: #667eea;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.new-link-button:hover {
+  background: #667eea;
+  color: white;
+}
+
+/* Mobile responsive */
+@media (max-width: 640px) {
+  .smart-link-modal {
+    max-height: 95vh;
+  }
+
+  .modal-header {
+    padding: 16px;
+  }
+
+  .modal-title h2 {
+    font-size: 18px;
+  }
+
+  .modal-content {
+    padding: 16px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-symptoms {
+    gap: 6px;
+  }
+
+  .quick-symptom-btn {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .symptom-input-row {
+    flex-direction: column;
+  }
+
+  .symptom-input-row select {
+    min-width: auto;
+  }
+
+  .link-box {
+    flex-direction: column;
+  }
+
+  .triage-badge-preview {
+    width: 80px;
+    height: 80px;
+    font-size: 20px;
+  }
+}
