@@ -14,6 +14,7 @@ import BurnHelp from './emergency/BurnHelp'
 import EmergencyContacts from './emergency/EmergencyContacts'
 import EmergencyChatbot from './emergency/EmergencyChatbot'
 import VitalScan from './emergency/VitalScan'
+import TriageViewer from './emergency/TriageViewer'
 
 // Health check feature pages
 import PillIdentifier from './health/PillIdentifier'
@@ -48,6 +49,7 @@ function App() {
           <Route path="/emergency/burn-help" element={<BurnHelp />} />
           <Route path="/emergency/contacts" element={<EmergencyContacts />} />
           <Route path="/emergency/chatbot" element={<EmergencyChatbot />} />
+          <Route path="/emergency/triage/:linkId" element={<TriageViewer />} />
           {/* Health Check Features */}
           <Route path="/health/pill-identifier" element={<PillIdentifier />} />
           <Route path="/health/wound-watch" element={<WoundWatchHealth />} />
