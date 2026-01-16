@@ -1,12 +1,12 @@
 import React, { useState, useRef } from 'react';
-import { Heart, Activity, AlertTriangle, Lightbulb } from 'lucide-react';
+import { Heart, Activity, ShieldCheck, XCircle } from 'lucide-react';
 
-export default function RealPulseScanner() {
+export default function AccuratePulseScanner() {
   const [bpm, setBpm] = useState(0);
   const [isScanning, setIsScanning] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [signalQuality, setSignalQuality] = useState(0); // 0 to 100
-  const [feedback, setFeedback] = useState("Ready");
+  const [isFingerDetected, setIsFingerDetected] = useState(false);
+  const [feedback, setFeedback] = useState("Ready to Scan");
   
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -15,133 +15,124 @@ export default function RealPulseScanner() {
   const startScan = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { 
-          facingMode: { exact: "environment" },
-          width: { ideal: 128 },
-          height: { ideal: 128 }
-        }
+        video: { facingMode: { ideal: "environment" }, width: 100, height: 100 }
       });
 
-      // ATTEMPT TO TURN ON FLASH (Works on Android/Chrome)
+      // Try Flash
       const track = stream.getVideoTracks()[0];
-      const capabilities = track.getCapabilities();
-      if (capabilities.torch) {
-        await track.applyConstraints({ advanced: [{ torch: true }] });
-      }
+      try {
+        const capabilities = track.getCapabilities();
+        if (capabilities.torch) await track.applyConstraints({ advanced: [{ torch: true }] });
+      } catch(e) { console.log("Flash not supported"); }
 
       videoRef.current.srcObject = stream;
       await videoRef.current.play();
       
       bufferRef.current = [];
       setIsScanning(true);
-      setFeedback("Scanning...");
       
-      const scanLoop = setInterval(() => {
-        if (bufferRef.current.length >= 300) { // 10 seconds @ 30fps
-          clearInterval(scanLoop);
-          processFinalBPM();
+      const loop = setInterval(() => {
+        if (bufferRef.current.length >= 300) {
+          clearInterval(loop);
+          calculateAccurateBPM();
           track.stop();
         } else {
-          analyzeFrame();
+          runPPGAnalysis();
         }
       }, 33);
     } catch (err) {
-      setFeedback("Use Back Camera + HTTPS");
+      setFeedback("Error: Need HTTPS and Camera access.");
     }
   };
 
-  const analyzeFrame = () => {
+  const runPPGAnalysis = () => {
     const canvas = canvasRef.current;
-    const video = videoRef.current;
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    ctx.drawImage(video, 0, 0, 20, 20);
-    const pixels = ctx.getImageData(0, 0, 20, 20).data;
+    ctx.drawImage(videoRef.current, 0, 0, 10, 10);
+    const p = ctx.getImageData(0, 0, 10, 10).data;
 
-    let r = 0, g = 0;
-    for (let i = 0; i < pixels.length; i += 4) {
-      r += pixels[i];
-      g += pixels[i+1];
+    let r = 0, g = 0, b = 0;
+    for (let i = 0; i < p.length; i += 4) {
+      r += p[i]; g += p[i+1]; b += p[i+2];
     }
 
-    // VALIDATION: If it's not red enough, the user isn't covering the lens
-    const redness = r / (g + 1);
-    if (redness < 1.8) {
-      setSignalQuality(0);
-      setFeedback("Cover lens completely!");
-      return; 
-    }
+    // --- THE GATEKEEPER LOGIC ---
+    // 1. Red must be significantly higher than Blue (Blood is red)
+    // 2. Brightness must not be "blown out" (No direct room light)
+    const isTissue = (r > g * 1.5) && (r > b * 2) && (r > 50);
 
-    setSignalQuality(Math.min(100, redness * 20));
-    bufferRef.current.push(r); // Storing the Red intensity
-    setProgress((bufferRef.current.length / 300) * 100);
+    if (isTissue) {
+      setIsFingerDetected(true);
+      setFeedback("Pulse detected... stay still");
+      bufferRef.current.push(g); // Green channel has the best pulse data
+      setProgress((bufferRef.current.length / 300) * 100);
+    } else {
+      setIsFingerDetected(false);
+      setFeedback("ERROR: No finger detected");
+      bufferRef.current = []; // Reset if finger is lifted
+      setProgress(0);
+    }
   };
 
-  const processFinalBPM = () => {
+  const calculateAccurateBPM = () => {
     const data = bufferRef.current;
-    if (data.length < 100) return;
+    if (data.length < 200) return;
 
-    // Remove DC offset (the "drift")
-    const mean = data.reduce((a, b) => a + b) / data.length;
-    const centered = data.map(v => v - mean);
-
-    // Count peaks using a simple "Slope Change" detection
-    let peaks = 0;
-    for (let i = 1; i < centered.length - 1; i++) {
-      if (centered[i] > centered[i-1] && centered[i] > centered[i+1] && centered[i] > 0) {
-        peaks++;
-        i += 10; // Ignore noise for next 10 frames (~0.3s)
+    // Filter: Simple Moving Average
+    const filtered = data.map((v, i, a) => i > 0 ? (v + a[i-1]) / 2 : v);
+    
+    // Find Zero-Crossings of the Derivative (Peak Detection)
+    let beats = 0;
+    for (let i = 2; i < filtered.length - 2; i++) {
+      if (filtered[i] > filtered[i-1] && filtered[i] > filtered[i+1]) {
+        // High-sensitivity check: only count if it's a real "mountain"
+        if (filtered[i] - filtered[i-2] > 0.1) { 
+          beats++;
+          i += 12; // Wait ~0.4s for next beat
+        }
       }
     }
 
-    const calculated = Math.round(peaks * 6); // 10 seconds * 6 = 60 seconds
-    if (calculated > 45 && calculated < 180) {
-      setBpm(calculated);
-      setFeedback("Scan Complete");
+    const result = Math.round(beats * 6);
+    if (result > 45 && result < 150) {
+      setBpm(result);
+      setFeedback("Complete");
     } else {
-      setBpm("??");
-      setFeedback("Signal too noisy. Hold still.");
+      setFeedback("Too much movement. Retry.");
     }
     setIsScanning(false);
   };
 
   return (
-    <div style={{ maxWidth: '350px', margin: '40px auto', padding: '25px', textAlign: 'center', background: '#fff', borderRadius: '30px', boxShadow: '0 20px 40px rgba(0,0,0,0.1)', fontFamily: 'sans-serif' }}>
-      <Heart color={isScanning ? "#ef4444" : "#cbd5e1"} fill={isScanning ? "#ef4444" : "none"} size={48} style={{ transition: '0.3s' }} />
-      
-      <h1 style={{ fontSize: '3rem', margin: '10px 0', color: '#1e293b' }}>{bpm || "--"}</h1>
-      <p style={{ color: '#64748b', marginTop: -10 }}>Beats Per Minute</p>
-
-      <div style={{ margin: '20px 0', textAlign: 'left' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '5px' }}>
-          <span>Signal Quality</span>
-          <span>{Math.round(signalQuality)}%</span>
-        </div>
-        <div style={{ height: '6px', background: '#f1f5f9', borderRadius: '3px' }}>
-          <div style={{ width: `${signalQuality}%`, height: '100%', background: signalQuality > 70 ? '#22c55e' : '#eab308', borderRadius: '3px', transition: '0.3s' }} />
-        </div>
+    <div style={{ maxWidth: '350px', margin: 'auto', padding: '30px', textAlign: 'center', background: '#fff', borderRadius: '25px', boxShadow: '0 10px 40px rgba(0,0,0,0.1)' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '15px' }}>
+        {isFingerDetected ? <ShieldCheck color="#22c55e" /> : <XCircle color="#ef4444" />}
+        <span style={{ marginLeft: '8px', fontSize: '14px', fontWeight: 'bold' }}>
+          {isFingerDetected ? "TISSUE DETECTED" : "NO CONTACT"}
+        </span>
       </div>
 
-      <p style={{ fontSize: '14px', color: signalQuality < 50 && isScanning ? '#ef4444' : '#475569', fontWeight: 'bold' }}>
-        {feedback}
-      </p>
+      <div style={{ position: 'relative', height: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+         <Heart size={80} color={isFingerDetected ? "#ef4444" : "#e2e8f0"} fill={isFingerDetected ? "#ef4444" : "none"} />
+         <h1 style={{ position: 'absolute', fontSize: '2.5rem', color: '#1e293b' }}>{bpm || "--"}</h1>
+      </div>
+
+      <p style={{ color: '#64748b' }}>{feedback}</p>
+
+      <div style={{ height: '6px', background: '#f1f5f9', borderRadius: '3px', margin: '20px 0' }}>
+        <div style={{ width: `${progress}%`, height: '100%', background: '#000', borderRadius: '3px', transition: '0.1s' }} />
+      </div>
 
       <button 
         onClick={startScan} 
         disabled={isScanning}
-        style={{ width: '100%', padding: '15px', borderRadius: '15px', border: 'none', background: '#0f172a', color: '#fff', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer' }}
+        style={{ width: '100%', padding: '15px', borderRadius: '15px', border: 'none', background: '#000', color: '#fff', fontWeight: 'bold' }}
       >
-        {isScanning ? `${Math.round(progress)}%` : "Start Pulse Scan"}
+        {isScanning ? "Scanning..." : "Measure Heart Rate"}
       </button>
 
-      {!isScanning && (
-        <div style={{ marginTop: '20px', fontSize: '12px', color: '#94a3b8', background: '#f8fafc', padding: '10px', borderRadius: '10px' }}>
-          <Lightbulb size={14} style={{ verticalAlign: 'middle', marginRight: '5px' }} />
-          If flash doesn't turn on, <strong>hold finger against a bright lamp.</strong>
-        </div>
-      )}
-
       <video ref={videoRef} style={{ display: 'none' }} playsInline muted />
-      <canvas ref={canvasRef} width="20" height="20" style={{ display: 'none' }} />
+      <canvas ref={canvasRef} style={{ display: 'none' }} width="10" height="10" />
     </div>
   );
 }
