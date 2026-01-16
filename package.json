@@ -10,9 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@mediapipe/camera_utils": "^0.3.1675466862",
     "@mediapipe/drawing_utils": "^0.3.1675466124",
     "@mediapipe/pose": "^0.5.1675469404",
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
     "@supabase/supabase-js": "^2.90.1",
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",

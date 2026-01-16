@@ -24,13 +24,13 @@ function Emergency() {
       route: '/emergency/action-cards'
     },
     {
-      title: 'AED Finder',
-      description: 'Locate nearest Automated External Defibrillators',
+      title: 'Resource Locator',
+      description: 'Find nearby AEDs and emergency facilities',
       icon: '🏥',
       route: '/emergency/aed-finder'
     },
     {
-      title: 'Trauma Track',
+      title: 'Trauma Eye',
       description: 'Assessment and monitoring for traumatic injuries',
       icon: '🩹',
       route: '/emergency/trauma-track'
@@ -52,12 +52,6 @@ function Emergency() {
       description: 'Real-time emergency guidance chatbot for critical situations',
       icon: '🤖',
       route: '/emergency/chatbot'
-    },
-    {
-      title: 'Emergency Voice Guidance',
-      description: 'Hands-free voice-guided emergency assistance',
-      icon: '🎤',
-      route: '/emergency/voice-guidance'
     }
   ]
 
