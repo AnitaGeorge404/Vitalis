@@ -41,6 +41,7 @@ function App() {
           <Route path="/emergency/contacts" element={<EmergencyContacts />} />
           <Route path="/emergency/chatbot" element={<EmergencyChatbot />} />
           <Route path="/emergency/voice-guidance" element={<VoiceGuidance />} />
+          <Route path="/emergency/voice-guidance" element={<VoiceGuidance />} />
           
           {/* Health Check Features */}
           <Route path="/health/wound-watch" element={<WoundWatchHealth />} />
