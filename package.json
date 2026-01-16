@@ -16,6 +16,7 @@
     "@mediapipe/pose": "^0.5.1675469404",
     "cors": "^2.8.5",
     "express": "^5.2.1",
+    "lucide-react": "^0.562.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.12.0",

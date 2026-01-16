@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { AlertCircle, Heart, ChevronRight } from 'lucide-react'
 import '../styles/home.css'
 
 /**
@@ -20,13 +21,15 @@ function Home() {
           className="mode-card emergency-mode"
           onClick={() => navigate('/emergency')}
         >
-          <div className="mode-icon">🚨</div>
+          <div className="mode-icon">
+            <AlertCircle size={48} strokeWidth={1.5} />
+          </div>
           <h2 className="mode-title">Emergency Mode</h2>
           <p className="mode-description">
             Quick access to life-saving guidance and emergency tools
           </p>
           <button className="mode-button emergency-button">
-            Access Emergency Tools →
+            Access Emergency Tools <ChevronRight size={18} />
           </button>
         </div>
 
@@ -34,13 +37,15 @@ function Home() {
           className="mode-card health-mode"
           onClick={() => navigate('/health')}
         >
-          <div className="mode-icon">🩺</div>
+          <div className="mode-icon">
+            <Heart size={48} strokeWidth={1.5} />
+          </div>
           <h2 className="mode-title">Health Check Mode</h2>
           <p className="mode-description">
             Assess injuries and get health guidance for common situations
           </p>
           <button className="mode-button health-button">
-            Start Health Check →
+            Start Health Check <ChevronRight size={18} />
           </button>
         </div>
       </div>

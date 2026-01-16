@@ -98,6 +98,9 @@ body {
   padding: 0.5rem 1rem;
   border-radius: var(--radius);
   transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .nav-link:hover {
