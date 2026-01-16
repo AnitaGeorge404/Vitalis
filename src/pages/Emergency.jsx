@@ -34,7 +34,7 @@ function Emergency() {
     },
     {
       title: 'Resource Locator',
-      description: 'Find nearby AEDs and emergency facilities',
+      description: 'Find nearby resources and facilities',
       icon: MapPin,
       route: '/emergency/aed-finder'
     },

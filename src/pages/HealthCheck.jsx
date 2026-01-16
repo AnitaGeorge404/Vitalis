@@ -26,7 +26,7 @@ function HealthCheck() {
     },
     {
       title: 'Respi Track',
-      description: 'Monitor respiratory and eye conditions',
+      description: 'Monitor respiratory conditions',
       icon: Eye,
       route: '/health/respi-track'
     },
