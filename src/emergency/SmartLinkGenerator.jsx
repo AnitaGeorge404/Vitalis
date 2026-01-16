@@ -54,26 +54,39 @@ function SmartLinkGenerator({ onClose, traumaEyeData = null }) {
       setLoading(true)
       setError(null)
 
-      const payload = {
+      // Generate triage level based on symptoms and data
+      const triageResult = calculateTriageLevel()
+
+      // Generate unique link ID
+      const linkId = generateLinkId()
+
+      // Create expiration time (24 hours from now)
+      const expiresAt = new Date()
+      expiresAt.setHours(expiresAt.getHours() + 24)
+
+      // Store data in localStorage for retrieval
+      const linkData = {
         symptoms,
         traumaEyeResult: traumaEyeData,
         location,
-        patientInfo
+        patientInfo,
+        triage: triageResult,
+        createdAt: new Date().toISOString(),
+        expiresAt: expiresAt.toISOString()
       }
 
-      const response = await fetch('http://localhost:5000/api/triage/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      })
+      localStorage.setItem(`vitalis-link-${linkId}`, JSON.stringify(linkData))
 
-      if (!response.ok) {
-        throw new Error('Failed to generate Smart-Link')
+      // Generate full URL
+      const fullUrl = `${window.location.origin}/emergency/triage/${linkId}`
+
+      const result = {
+        linkId,
+        fullUrl,
+        triage: triageResult,
+        expiresAt: expiresAt.toISOString()
       }
 
-      const result = await response.json()
       setGeneratedLink(result)
     } catch (err) {
       setError(err.message)
@@ -81,6 +94,51 @@ function SmartLinkGenerator({ onClose, traumaEyeData = null }) {
     } finally {
       setLoading(false)
     }
+  }
+
+  const calculateTriageLevel = () => {
+    // Determine triage level based on symptoms severity
+    const hasHighSeverity = symptoms.some(s => s.severity === 'high')
+    const hasCriticalSymptoms = symptoms.some(s => 
+      ['Chest Pain', 'Difficulty Breathing', 'Severe Bleeding', 'Loss of Consciousness', 'Head Injury'].includes(s.name)
+    )
+    const hasTraumaCritical = traumaEyeData?.severity === 'critical' || traumaEyeData?.severity === 'severe'
+
+    if (hasTraumaCritical || hasCriticalSymptoms || (hasHighSeverity && symptoms.length >= 2)) {
+      return {
+        level: 'CRITICAL',
+        explanation: '🚨 Immediate medical attention required. Call 911 or go to ER immediately.',
+        color: '#dc2626'
+      }
+    } else if (hasHighSeverity || symptoms.length >= 3 || traumaEyeData?.severity === 'moderate') {
+      return {
+        level: 'URGENT',
+        explanation: '⚠️ Seek medical attention within 2-4 hours. Visit urgent care or ER.',
+        color: '#f59e0b'
+      }
+    } else if (symptoms.length >= 1) {
+      return {
+        level: 'MODERATE',
+        explanation: '💛 Medical attention recommended within 24 hours. Schedule doctor visit.',
+        color: '#eab308'
+      }
+    } else {
+      return {
+        level: 'LOW',
+        explanation: '✅ Monitor symptoms. Seek medical advice if condition worsens.',
+        color: '#16a34a'
+      }
+    }
+  }
+
+  const generateLinkId = () => {
+    // Generate random 8-character alphanumeric ID
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    let result = ''
+    for (let i = 0; i < 8; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length))
+    }
+    return result
   }
 
   const copyToClipboard = () => {
