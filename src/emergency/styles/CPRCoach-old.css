@@ -1,0 +1,167 @@
+/* CPR Coach - Control Panel Design */
+.cpr-coach-container {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-dark);
+  color: var(--text-inverse);
+  overflow: hidden;
+}
+
+/* Compact Header */
+.cpr-header {
+  flex-shrink: 0;
+  background-color: var(--bg-dark-secondary);
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 2px solid var(--emergency-red);
+  box-shadow: var(--shadow-md);
+}
+
+.cpr-header h1 {
+  font-size: var(--font-size-2xl);
+  color: var(--text-inverse);
+  margin: 0;
+  font-weight: var(--font-weight-bold);
+}
+
+.cpr-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+  margin: var(--space-xs) 0 0 0;
+  font-weight: var(--font-weight-normal);
+}
+
+.disclaimer-banner {
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--emergency-red) 0%, var(--emergency-red-hover) 100%);
+  color: var(--text-inverse);
+  padding: var(--space-sm) var(--space-lg);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Main Content - Grid Layout */
+.cpr-main-content {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Camera Section */
+.cpr-camera-section {
+  background-color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Control Panel - Side Panel */
+.cpr-control-panel {
+  background-color: var(--bg-dark-secondary);
+  border-left: 2px solid var(--border-color-dark);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  overflow-y: auto;
+}
+
+.cpr-control-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.cpr-control-panel::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+
+.cpr-control-panel::-webkit-scrollbar-thumb {
+  background: var(--border-color-dark);
+  border-radius: var(--radius-sm);
+}
+
+.cpr-reset-button {
+  padding: var(--space-md) var(--space-lg);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  background: linear-gradient(135deg, var(--warning-amber) 0%, #ea580c 100%);
+  color: var(--text-inverse);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cpr-reset-button:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  background: linear-gradient(135deg, #fb923c 0%, var(--warning-amber) 100%);
+}
+
+.cpr-reset-button:active {
+  transform: translateY(0);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .cpr-main-content {
+    grid-template-columns: 1fr 320px;
+  }
+
+  .cpr-control-panel {
+    padding: var(--space-md);
+    gap: var(--space-md);
+  }
+}
+
+@media (max-width: 768px) {
+  .cpr-main-content {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+  }
+
+  .cpr-control-panel {
+    max-height: 40vh;
+    border-left: none;
+    border-top: 2px solid var(--border-color-dark);
+  }
+
+  .cpr-header h1 {
+    font-size: var(--font-size-xl);
+  }
+
+  .cpr-subtitle {
+    font-size: var(--font-size-xs);
+  }
+
+  .disclaimer-banner {
+    font-size: var(--font-size-xs);
+    padding: var(--space-xs) var(--space-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .cpr-header {
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .cpr-header h1 {
+    font-size: var(--font-size-lg);
+  }
+
+  .cpr-control-panel {
+    padding: var(--space-sm);
+  }
+}

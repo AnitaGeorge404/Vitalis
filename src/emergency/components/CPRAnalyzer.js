@@ -1,6 +1,9 @@
 /**
  * CPRAnalyzer: Analyzes pose landmarks for CPR posture and compression detection
- * Enforces correct CPR biomechanics with real-time feedback
+ * EMERGENCY-OPTIMIZED: Prioritizes helping over perfection
+ * - Counts compressions regardless of perfect form
+ * - Provides helpful guidance, not strict enforcement
+ * - Forgiving thresholds for real emergency situations
  */
 class CPRAnalyzer {
   constructor(onPostureUpdate, onCompressionUpdate) {
@@ -15,32 +18,34 @@ class CPRAnalyzer {
     this.peakShoulderY = null;
     this.troughShoulderY = null;
 
-    // Posture validation
+    // Posture validation (for feedback only, not blocking)
     this.isPostureValid = false;
     this.lastSpineAngle = null;
 
     // Elbow state tracking with temporal smoothing
     this.elbowStateHistory = [];
-    this.elbowStateHistorySize = 5; // Require 5 consecutive frames for state change
+    this.elbowStateHistorySize = 3; // Reduced from 5 for faster response
     this.currentElbowState = 'GOOD';
 
     // Smoothing filters
     this.landmarkHistory = [];
-    this.historySize = 5;
+    this.historySize = 3; // Reduced from 5 for better responsiveness
     this.shoulderYHistory = [];
     this.shoulderYHistorySize = 3;
 
     // Audio feedback
     this.audioContext = null;
     this.lastAudioFeedbackTime = 0;
-    this.audioFeedbackCooldown = 3000;
+    this.audioFeedbackCooldown = 5000; // Increased to be less annoying
 
-    // Thresholds - Softened for real-world use
-    this.ELBOW_ANGLE_GOOD = 155;        // Excellent form
-    this.ELBOW_ANGLE_ACCEPTABLE = 135;  // Still valid CPR
-    this.SPINE_ANGLE_CHANGE_THRESHOLD = 15;
-    this.COMPRESSION_THRESHOLD = 0.015;
-    this.HAND_POSITION_TOLERANCE = 0.1;
+    // EMERGENCY-FRIENDLY THRESHOLDS
+    // More forgiving for real emergency situations
+    this.ELBOW_ANGLE_GOOD = 150;        // Lowered from 155 (easier to achieve)
+    this.ELBOW_ANGLE_ACCEPTABLE = 120;  // Lowered from 135 (much more forgiving)
+    this.SPINE_ANGLE_CHANGE_THRESHOLD = 25; // Increased from 15 (allow more movement)
+    this.COMPRESSION_THRESHOLD = 0.012; // Lowered from 0.015 (detect smaller movements)
+    this.MIN_COMPRESSION_DEPTH = 0.008; // Minimum depth to count (very forgiving)
+    this.HAND_POSITION_TOLERANCE = 0.15; // Increased from 0.1 (more forgiving)
 
     this.initAudio();
   }
@@ -56,7 +61,7 @@ class CPRAnalyzer {
   analyzePose(landmarks) {
     const smoothedLandmarks = this.smoothLandmarks(landmarks);
 
-    // Evaluate posture components
+    // Evaluate posture components (for feedback only)
     const armPosture = this.checkArmStraightness(smoothedLandmarks);
     const spineStability = this.checkSpineStability(smoothedLandmarks);
     const handPosition = this.checkHandPosition(smoothedLandmarks);
@@ -64,34 +69,38 @@ class CPRAnalyzer {
     // Update elbow state with temporal smoothing
     this.updateElbowState(armPosture.elbowState);
 
-    // Spine stability is HARD GATE (biomechanically critical)
-    // Elbow is SOFT GUIDANCE (quality indicator)
-    const spineValid = spineStability.isStable;
-    const elbowAllowsCompression = this.currentElbowState !== 'BAD';
+    // CRITICAL CHANGE: Always allow compression detection
+    // In emergencies, imperfect CPR is better than no CPR
+    // We provide guidance but NEVER block compression counting
+    this.isPostureValid = true; // Always true - we're here to help, not judge
 
-    // Compression detection requires stable spine + acceptable elbow state
-    this.isPostureValid = spineValid && elbowAllowsCompression;
-
-    // Build comprehensive feedback
+    // Build HELPFUL, ENCOURAGING feedback
     let postureFeedback = '';
-    if (!spineStability.isStable) {
-      postureFeedback = '⚠ Keep your back straight - Use shoulders only!';
-    } else if (this.currentElbowState === 'BAD') {
-      postureFeedback = '⚠ Straighten your arms - Lock elbows!';
-    } else if (this.currentElbowState === 'ACCEPTABLE') {
-      postureFeedback = '⚡ Good! Try to lock elbows more';
-    } else if (!handPosition.isCorrect) {
-      postureFeedback = '⚡ Adjust hands to center of chest';
-    } else {
-      postureFeedback = '✓ Excellent form - Keep it up!';
+    
+    // Priority 1: Extreme spine bending (only truly dangerous thing)
+    if (!spineStability.isStable && spineStability.angleChange > 35) {
+      postureFeedback = '💡 Tip: Use your shoulders, not your back';
+      // Only play audio for extreme cases
+      this.playAudioFeedback();
+    }
+    // Priority 2: Very bent elbows (affects effectiveness)
+    else if (this.currentElbowState === 'BAD' && armPosture.worstAngle < 100) {
+      postureFeedback = '💡 Tip: Straighten your arms a bit more';
+    }
+    // Priority 3: Helpful suggestions
+    else if (this.currentElbowState === 'ACCEPTABLE') {
+      postureFeedback = '👍 Good job! Keep going strong';
+    }
+    else if (!handPosition.isCorrect) {
+      postureFeedback = '👍 Doing great! Keep it up';
+    }
+    // Default: Encouragement
+    else {
+      postureFeedback = '✓ Excellent! You\'re doing CPR correctly';
     }
 
-    // Compression detection (shoulder-driven only)
-    if (spineValid) {
-      this.detectCompression(smoothedLandmarks);
-    } else {
-      this.resetCompressionState();
-    }
+    // ALWAYS detect compressions - this is what matters most
+    this.detectCompression(smoothedLandmarks);
 
     const compressionRate = this.calculateCompressionRate();
 
@@ -101,11 +110,6 @@ class CPRAnalyzer {
 
     if (this.onCompressionUpdate) {
       this.onCompressionUpdate(this.compressionCount, compressionRate);
-    }
-
-    // Audio feedback only for critical errors (spine bending)
-    if (!spineStability.isStable) {
-      this.playAudioFeedback();
     }
   }
 
@@ -346,34 +350,47 @@ class CPRAnalyzer {
 
     const deltaY = smoothedShoulderY - this.lastShoulderY;
 
+    // Track peak (highest point - smallest Y value)
     if (smoothedShoulderY < this.peakShoulderY) {
       this.peakShoulderY = smoothedShoulderY;
     }
 
+    // Track trough (lowest point - largest Y value)
     if (smoothedShoulderY > this.troughShoulderY) {
       this.troughShoulderY = smoothedShoulderY;
     }
 
+    // EMERGENCY-FRIENDLY COMPRESSION DETECTION
+    // Detect upward motion (compression phase)
     if (deltaY > this.COMPRESSION_THRESHOLD && !this.isCompressing) {
       this.isCompressing = true;
       this.peakShoulderY = smoothedShoulderY;
     }
 
+    // Detect downward motion (release phase) - count the compression
     if (deltaY < -this.COMPRESSION_THRESHOLD && this.isCompressing) {
       const compressionDepth = this.troughShoulderY - this.peakShoulderY;
       
-      if (compressionDepth > this.COMPRESSION_THRESHOLD) {
+      // MUCH MORE FORGIVING: Accept any visible movement
+      // In emergencies, counting compressions accurately is more important
+      // than perfect depth (depth is hard to measure from 2D camera anyway)
+      if (compressionDepth > this.MIN_COMPRESSION_DEPTH) {
         this.isCompressing = false;
         this.compressionCount++;
         this.compressionTimestamps.push(Date.now());
 
+        // Keep only recent compressions for rate calculation
         const tenSecondsAgo = Date.now() - 10000;
         this.compressionTimestamps = this.compressionTimestamps.filter(
           timestamp => timestamp > tenSecondsAgo
         );
 
+        console.log(`[CPR Analyzer] Compression detected! Count: ${this.compressionCount}, Depth: ${compressionDepth.toFixed(4)}`);
+
         this.troughShoulderY = smoothedShoulderY;
       } else {
+        // Even if depth is minimal, still reset state
+        // This prevents getting stuck in compressing state
         this.isCompressing = false;
       }
     }
