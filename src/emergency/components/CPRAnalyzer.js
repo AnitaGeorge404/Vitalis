@@ -19,6 +19,11 @@ class CPRAnalyzer {
     this.isPostureValid = false;
     this.lastSpineAngle = null;
 
+    // Elbow state tracking with temporal smoothing
+    this.elbowStateHistory = [];
+    this.elbowStateHistorySize = 5; // Require 5 consecutive frames for state change
+    this.currentElbowState = 'GOOD';
+
     // Smoothing filters
     this.landmarkHistory = [];
     this.historySize = 5;
@@ -30,8 +35,9 @@ class CPRAnalyzer {
     this.lastAudioFeedbackTime = 0;
     this.audioFeedbackCooldown = 3000;
 
-    // Thresholds
-    this.ELBOW_ANGLE_THRESHOLD = 160;
+    // Thresholds - Softened for real-world use
+    this.ELBOW_ANGLE_GOOD = 155;        // Excellent form
+    this.ELBOW_ANGLE_ACCEPTABLE = 135;  // Still valid CPR
     this.SPINE_ANGLE_CHANGE_THRESHOLD = 15;
     this.COMPRESSION_THRESHOLD = 0.015;
     this.HAND_POSITION_TOLERANCE = 0.1;
@@ -50,24 +56,38 @@ class CPRAnalyzer {
   analyzePose(landmarks) {
     const smoothedLandmarks = this.smoothLandmarks(landmarks);
 
+    // Evaluate posture components
     const armPosture = this.checkArmStraightness(smoothedLandmarks);
     const spineStability = this.checkSpineStability(smoothedLandmarks);
     const handPosition = this.checkHandPosition(smoothedLandmarks);
 
-    this.isPostureValid = armPosture.isCorrect && spineStability.isStable;
+    // Update elbow state with temporal smoothing
+    this.updateElbowState(armPosture.elbowState);
 
+    // Spine stability is HARD GATE (biomechanically critical)
+    // Elbow is SOFT GUIDANCE (quality indicator)
+    const spineValid = spineStability.isStable;
+    const elbowAllowsCompression = this.currentElbowState !== 'BAD';
+
+    // Compression detection requires stable spine + acceptable elbow state
+    this.isPostureValid = spineValid && elbowAllowsCompression;
+
+    // Build comprehensive feedback
     let postureFeedback = '';
-    if (!armPosture.isCorrect) {
-      postureFeedback = '⚠ Lock your elbows - Keep arms straight!';
-    } else if (!spineStability.isStable) {
-      postureFeedback = '⚠ Use your shoulders, not your back!';
+    if (!spineStability.isStable) {
+      postureFeedback = '⚠ Keep your back straight - Use shoulders only!';
+    } else if (this.currentElbowState === 'BAD') {
+      postureFeedback = '⚠ Straighten your arms - Lock elbows!';
+    } else if (this.currentElbowState === 'ACCEPTABLE') {
+      postureFeedback = '⚡ Good! Try to lock elbows more';
     } else if (!handPosition.isCorrect) {
-      postureFeedback = '⚠ Place both hands at center of chest';
+      postureFeedback = '⚡ Adjust hands to center of chest';
     } else {
-      postureFeedback = '✓ Perfect posture - Keep it up!';
+      postureFeedback = '✓ Excellent form - Keep it up!';
     }
 
-    if (this.isPostureValid) {
+    // Compression detection (shoulder-driven only)
+    if (spineValid) {
       this.detectCompression(smoothedLandmarks);
     } else {
       this.resetCompressionState();
@@ -83,7 +103,8 @@ class CPRAnalyzer {
       this.onCompressionUpdate(this.compressionCount, compressionRate);
     }
 
-    if (!this.isPostureValid) {
+    // Audio feedback only for critical errors (spine bending)
+    if (!spineStability.isStable) {
       this.playAudioFeedback();
     }
   }
@@ -139,6 +160,10 @@ class CPRAnalyzer {
     return angleDegrees;
   }
 
+  /**
+   * Check arm straightness with 3-tier classification
+   * Returns elbow state: GOOD, ACCEPTABLE, or BAD
+   */
   checkArmStraightness(landmarks) {
     const leftShoulder = landmarks[11];
     const leftElbow = landmarks[13];
@@ -156,7 +181,7 @@ class CPRAnalyzer {
                         rightWrist?.visibility > minVisibility;
 
     if (!leftVisible && !rightVisible) {
-      return { isCorrect: false, feedback: 'Position arms in view' };
+      return { elbowState: 'ACCEPTABLE', leftAngle: null, rightAngle: null };
     }
 
     let leftAngle = null;
@@ -170,11 +195,44 @@ class CPRAnalyzer {
       rightAngle = this.calculateAngle(rightShoulder, rightElbow, rightWrist);
     }
 
-    const leftStraight = leftAngle === null || leftAngle >= this.ELBOW_ANGLE_THRESHOLD;
-    const rightStraight = rightAngle === null || rightAngle >= this.ELBOW_ANGLE_THRESHOLD;
-    const isCorrect = leftStraight && rightStraight;
+    // Use the worse of the two arms for classification
+    const worstAngle = Math.min(
+      leftAngle !== null ? leftAngle : 180,
+      rightAngle !== null ? rightAngle : 180
+    );
 
-    return { isCorrect, leftAngle, rightAngle };
+    // Three-tier classification
+    let elbowState;
+    if (worstAngle >= this.ELBOW_ANGLE_GOOD) {
+      elbowState = 'GOOD';
+    } else if (worstAngle >= this.ELBOW_ANGLE_ACCEPTABLE) {
+      elbowState = 'ACCEPTABLE';
+    } else {
+      elbowState = 'BAD';
+    }
+
+    return { elbowState, leftAngle, rightAngle, worstAngle };
+  }
+
+  /**
+   * Update elbow state with temporal smoothing
+   * Requires 5 consecutive frames to change state
+   */
+  updateElbowState(newState) {
+    this.elbowStateHistory.push(newState);
+    
+    if (this.elbowStateHistory.length > this.elbowStateHistorySize) {
+      this.elbowStateHistory.shift();
+    }
+
+    // Only change state if all recent frames agree
+    if (this.elbowStateHistory.length === this.elbowStateHistorySize) {
+      const allSame = this.elbowStateHistory.every(state => state === newState);
+      
+      if (allSame) {
+        this.currentElbowState = newState;
+      }
+    }
   }
 
   checkSpineStability(landmarks) {
