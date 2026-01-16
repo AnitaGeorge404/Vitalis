@@ -32,16 +32,22 @@ function Emergency() {
       route: '/emergency/trauma-track'
     },
     {
-      title: 'Respi Track',
-      description: 'Emergency guidance for eye injuries and breathing problems',
-      icon: '👁️',
-      route: '/emergency/eye-respiratory-track'
+      title: 'Burn Help',
+      description: 'Immediate burn assessment and first aid guidance',
+      icon: '�',
+      route: '/emergency/burn-help'
     },
     {
       title: 'Smart Emergency Contacts',
       description: 'Quick alert system for emergency contacts',
       icon: '📞',
       route: '/emergency/contacts'
+    },
+    {
+      title: 'Emergency AI Assistant',
+      description: 'Real-time emergency guidance chatbot for critical situations',
+      icon: '🤖',
+      route: '/emergency/chatbot'
     },
     {
       title: 'Emergency Voice Guidance',

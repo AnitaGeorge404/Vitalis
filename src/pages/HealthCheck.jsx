@@ -20,6 +20,12 @@ function HealthCheck() {
       route: '/health/burn-guide'
     },
     {
+      title: 'Respi Track',
+      description: 'Monitor respiratory and eye conditions',
+      icon: '👁️',
+      route: '/health/respi-track'
+    },
+    {
       title: '"Do I Need a Doctor?" Checklist',
       description: 'Evaluate symptoms and determine care level needed',
       icon: '🏥',
