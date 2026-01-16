@@ -1,0 +1,152 @@
+/* Home Page Styles */
+.home-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.home-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.home-title {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.home-subtitle {
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+/* Mode Selector */
+.mode-selector {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.mode-card {
+  background-color: var(--bg-primary);
+  border-radius: var(--radius);
+  padding: 2.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow-md);
+  border: 2px solid transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mode-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-lg);
+}
+
+.emergency-mode {
+  border-color: #fee2e2;
+}
+
+.emergency-mode:hover {
+  border-color: var(--primary-emergency);
+}
+
+.health-mode {
+  border-color: #d1fae5;
+}
+
+.health-mode:hover {
+  border-color: var(--primary-health);
+}
+
+.mode-icon {
+  font-size: 5rem;
+  margin-bottom: 1.5rem;
+}
+
+.mode-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.mode-description {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.mode-button {
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: var(--transition);
+  color: white;
+}
+
+.emergency-button {
+  background-color: var(--primary-emergency);
+}
+
+.emergency-button:hover {
+  background-color: #b91c1c;
+  transform: scale(1.05);
+}
+
+.health-button {
+  background-color: var(--primary-health);
+}
+
+.health-button:hover {
+  background-color: #047857;
+  transform: scale(1.05);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .home-title {
+    font-size: 2rem;
+  }
+
+  .home-subtitle {
+    font-size: 1.2rem;
+  }
+
+  .mode-selector {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .mode-card {
+    padding: 2rem;
+  }
+
+  .mode-icon {
+    font-size: 4rem;
+  }
+
+  .mode-title {
+    font-size: 1.5rem;
+  }
+
+  .mode-description {
+    font-size: 1rem;
+  }
+
+  .mode-button {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+}
