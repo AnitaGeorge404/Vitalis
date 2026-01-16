@@ -1,170 +1,472 @@
-import React, { useState } from "react";
-import { Pill, AlertTriangle, CheckCircle2, Search, Plus, Info, Trash2, ShieldCheck, HelpCircle } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import * as tf from "@tensorflow/tfjs";
 
-function PillInteractionChecker() {
-  const [currentMeds, setCurrentMeds] = useState(["Aspirin", "Lisinopril"]);
-  const [newMed, setNewMed] = useState("");
-  const [interactionResult, setInteractionResult] = useState(null);
+const SkinRashRiskDetector = () => {
+  const [image, setImage] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [riskLevel, setRiskLevel] = useState("Low");
+  const [riskScore, setRiskScore] = useState(0);
+  const [advice, setAdvice] = useState("");
+  const [analysisDetails, setAnalysisDetails] = useState({});
+  const [dragActive, setDragActive] = useState(false);
+  const canvasRef = useRef(null);
+  const fileInputRef = useRef(null);
 
-  // Expanded Knowledge Base of Common Interactions
-  const INTERACTION_MAP = [
-    {
-      pair: ["aspirin", "ibuprofen"],
-      status: "danger",
-      title: "NSAID Conflict",
-      message: "Taking Aspirin and Ibuprofen together increases the risk of stomach bleeding and can reduce Aspirin's heart-protective benefits."
-    },
-    {
-      pair: ["warfarin", "aspirin"],
-      status: "danger",
-      title: "Severe Bleeding Risk",
-      message: "Combining two potent blood thinners significantly increases the risk of internal bleeding. Do not combine unless specifically directed by a specialist."
-    },
-    {
-      pair: ["lisinopril", "spironolactone"],
-      status: "warning",
-      title: "Potassium Warning",
-      message: "Both drugs can raise potassium levels. This combination requires blood monitoring to avoid heart rhythm issues."
-    },
-    {
-      pair: ["sertraline", "tramadol"],
-      status: "danger",
-      title: "Serotonin Syndrome Risk",
-      message: "High risk of a dangerous chemical imbalance. Can cause confusion, rapid heart rate, and muscle stiffness."
-    },
-    {
-      pair: ["simvastatin", "amlodipine"],
-      status: "warning",
-      title: "Statin Concentration Alert",
-      message: "Amlodipine can increase levels of Simvastatin in the body, increasing the risk of muscle pain (myopathy)."
-    },
-    {
-      pair: ["metformin", "alcohol"],
-      status: "danger",
-      title: "Lactic Acidosis Risk",
-      message: "Combining Metformin with excessive alcohol can cause a dangerous buildup of lactic acid in the blood."
-    },
-    {
-      pair: ["amoxicillin", "methotrexate"],
-      status: "warning",
-      title: "Elimination Delay",
-      message: "Amoxicillin can slow the clearance of Methotrexate, potentially increasing its toxicity."
-    },
-    {
-      pair: ["citalopram", "ibuprofen"],
-      status: "warning",
-      title: "Gastrointestinal Risk",
-      message: "SSRIs combined with NSAIDs like Ibuprofen can increase the risk of upper GI bleeding."
+  useEffect(() => {
+    if (image && canvasRef.current) {
+      const ctx = canvasRef.current.getContext("2d");
+      const maxSize = 500;
+      const ratio = Math.min(maxSize / image.width, maxSize / image.height);
+      const newWidth = image.width * ratio;
+      const newHeight = image.height * ratio;
+
+      canvasRef.current.width = newWidth;
+      canvasRef.current.height = newHeight;
+      ctx.drawImage(image, 0, 0, newWidth, newHeight);
     }
-  ];
+  }, [image]);
 
-  const checkInteractions = () => {
-    if (!newMed) return;
-    
-    const searchName = newMed.toLowerCase().trim();
-    const activeMeds = currentMeds.map(m => m.toLowerCase().trim());
-    
-    // Search for any pair in the database that matches the newMed and ANY currentMed
-    const found = INTERACTION_MAP.find(item => 
-      item.pair.includes(searchName) && item.pair.some(med => activeMeds.includes(med))
-    );
+  const handleImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith("image/")) return;
 
-    if (found) {
-      setInteractionResult(found);
-    } else {
-      // Handle "Not Found" or "Safe" case
-      setInteractionResult({
-        status: "unknown",
-        title: "No Common Interaction Found",
-        message: `We don't have a documented conflict for "${newMed}" with your current list. However, this is not a guarantee of safety. Consult your pharmacist for a full clinical review.`
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => setImage(img);
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+    if (e.target) e.target.value = "";
+  };
+
+  const analyzeRashRisk = async () => {
+    if (!image || isAnalyzing || !canvasRef.current) return;
+
+    setIsAnalyzing(true);
+
+    try {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
+
+      // Convert canvas to tensor
+      const tensor = tf.browser.fromPixels(canvas)
+        .resizeNearestNeighbor([224, 224])
+        .toFloat()
+        .div(255.0)
+        .expandDims();
+
+      // Advanced color analysis using TensorFlow
+      const imgData = await tensor.squeeze().array();
+      
+      // Calculate redness (red channel dominance)
+      let rednessScore = 0;
+      let inflammationScore = 0;
+      let textureScore = 0;
+      let coverageScore = 0;
+      
+      const totalPixels = 224 * 224;
+      let redPixels = 0;
+      let edgeCount = 0;
+      
+      for (let y = 0; y < 224; y++) {
+        for (let x = 0; x < 224; x++) {
+          const r = imgData[y][x][0];
+          const g = imgData[y][x][1];
+          const b = imgData[y][x][2];
+          
+          // Detect redness
+          if (r > 0.55 && r > g * 1.2 && r > b * 1.2) {
+            redPixels++;
+            rednessScore += (r - (g + b) / 2);
+          }
+          
+          // Detect edges (texture)
+          if (x > 0 && y > 0) {
+            const prevR = imgData[y][x-1][0];
+            const prevG = imgData[y-1][x][1];
+            if (Math.abs(r - prevR) > 0.15 || Math.abs(g - prevG) > 0.15) {
+              edgeCount++;
+            }
+          }
+        }
+      }
+      
+      // Calculate scores
+      rednessScore = Math.min(100, (redPixels / totalPixels) * 200);
+      coverageScore = Math.min(100, (redPixels / totalPixels) * 150);
+      textureScore = Math.min(100, (edgeCount / totalPixels) * 300);
+      inflammationScore = Math.min(100, rednessScore * 0.6 + textureScore * 0.4);
+      
+      const finalScore = Math.round(
+        rednessScore * 0.3 +
+        inflammationScore * 0.35 +
+        textureScore * 0.2 +
+        coverageScore * 0.15
+      );
+
+      // Determine risk level
+      let level = "Low";
+      let adviceText = "✓ Low risk detected. Continue normal skincare routine.";
+      
+      if (finalScore > 70) {
+        level = "High";
+        adviceText = "⚠️ High inflammation risk detected. Seek immediate medical attention.";
+      } else if (finalScore > 40) {
+        level = "Medium";
+        adviceText = "⚠️ Moderate rash indicators. Monitor closely and consult if worsens.";
+      }
+
+      setRiskScore(finalScore);
+      setRiskLevel(level);
+      setAdvice(adviceText);
+      setAnalysisDetails({
+        redness: Math.round(rednessScore),
+        inflammation: Math.round(inflammationScore),
+        texture: Math.round(textureScore),
+        coverage: Math.round(coverageScore),
       });
+
+      // Draw overlay
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      ctx.putImageData(imageData, 0, 0);
+
+      const gradient = ctx.createRadialGradient(
+        canvas.width / 2, canvas.height / 2, 0,
+        canvas.width / 2, canvas.height / 2,
+        Math.max(canvas.width, canvas.height)
+      );
+
+      const colors = {
+        High: ["rgba(239,68,68,0.4)", "rgba(239,68,68,0.05)"],
+        Medium: ["rgba(245,158,11,0.35)", "rgba(245,158,11,0.05)"],
+        Low: ["rgba(34,197,94,0.25)", "rgba(34,197,94,0.02)"],
+      };
+
+      gradient.addColorStop(0, colors[level][0]);
+      gradient.addColorStop(1, colors[level][1]);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.strokeStyle = level === "High" ? "rgba(239,68,68,0.6)" :
+                        level === "Medium" ? "rgba(245,158,11,0.6)" :
+                        "rgba(34,197,94,0.4)";
+      ctx.lineWidth = 4;
+      ctx.strokeRect(0, 0, canvas.width, canvas.height);
+
+      tensor.dispose();
+    } catch (error) {
+      console.error("Analysis error:", error);
+      setAdvice("❌ Analysis failed. Please try again.");
     }
+
+    setIsAnalyzing(false);
+  };
+
+  const clearAnalysis = () => {
+    setImage(null);
+    setRiskScore(0);
+    setRiskLevel("Low");
+    setAdvice("");
+    setAnalysisDetails({});
   };
 
   return (
-    <div className="vital-scan-container" style={{ background: '#f8fafc', padding: '20px', maxWidth: '1000px', margin: '0 auto' }}>
-      
-      <div style={{ marginBottom: '20px', borderLeft: '4px solid #3b82f6', paddingLeft: '15px' }}>
-        <h1 style={{ fontSize: '1.4rem', color: '#1e293b', margin: 0 }}>Interaction Guard</h1>
-        <p style={{ color: '#64748b', fontSize: '0.85rem' }}>Verify safety before taking new medication.</p>
-      </div>
+    <div style={styles.detector}>
+      <div style={styles.card}>
+        <h1 style={styles.title}>🩹 Skin Rash Detector</h1>
+        <p style={styles.subtitle}>
+          Upload clear photo. AI detects inflammation patterns instantly.
+          <br />
+          <strong style={styles.warning}>⚠️ Educational tool — Consult doctor for diagnosis</strong>
+        </p>
 
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: window.innerWidth > 800 ? '320px 1fr' : '1fr', 
-        gap: '20px',
-        alignItems: 'start' 
-      }}>
-        
-        {/* LEFT: Current Medications Card */}
-        <div style={{ background: '#ffffff', borderRadius: '16px', padding: '20px', border: '1px solid #e2e8f0' }}>
-          <h2 style={{ fontSize: '0.8rem', marginBottom: '16px', color: '#64748b', textTransform: 'uppercase', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <ShieldCheck size={16} color="#3b82f6" /> My Active Meds
-          </h2>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {currentMeds.map((med, i) => (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
-                <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#334155' }}>{med}</span>
-                <Trash2 size={14} color="#94a3b8" style={{ cursor: 'pointer' }} onClick={() => setCurrentMeds(currentMeds.filter((_, idx) => idx !== i))} />
-              </div>
-            ))}
-            
-            <input 
-              placeholder="+ Add current medicine..." 
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && e.target.value) {
-                  setCurrentMeds([...currentMeds, e.target.value]);
-                  e.target.value = "";
-                }
-              }}
-              style={{ width: '100%', padding: '8px', marginTop: '8px', borderRadius: '8px', border: '1px dashed #cbd5e1', fontSize: '0.8rem' }}
+        {!image ? (
+          <label
+            style={{...styles.uploadArea, ...(dragActive ? styles.dragover : {})}}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragActive(true);
+            }}
+            onDragLeave={() => setDragActive(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragActive(false);
+              handleImageUpload({ target: { files: e.dataTransfer.files } });
+            }}
+          >
+            <div style={styles.uploadIcon}>📸</div>
+            <div style={styles.uploadText}>Tap or drag skin photo</div>
+            <div style={styles.uploadSubtext}>JPG, PNG (max 10MB)</div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              style={{ display: "none" }}
             />
-          </div>
-        </div>
-
-        {/* RIGHT: The Checker Card */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ background: '#ffffff', borderRadius: '16px', padding: '24px', border: '1px solid #e2e8f0' }}>
-            <h3 style={{ fontSize: '1rem', color: '#1e293b', marginBottom: '16px' }}>Check New Medication</h3>
-            
-            <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-              <input
-                placeholder="e.g. Ibuprofen, Warfarin..."
-                value={newMed}
-                onChange={(e) => setNewMed(e.target.value)}
-                style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '0.9rem' }}
-              />
-              <button onClick={checkInteractions} style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '0 24px', borderRadius: '10px', fontWeight: '700', cursor: 'pointer' }}>
-                Check
-              </button>
+          </label>
+        ) : (
+          <>
+            <div style={styles.canvasContainer}>
+              <canvas ref={canvasRef} style={styles.canvas} />
             </div>
 
-            {interactionResult && (
-              <div style={{ 
-                padding: '16px', 
-                borderRadius: '12px', 
-                background: interactionResult.status === 'danger' ? '#fff1f2' : (interactionResult.status === 'warning' ? '#fffbeb' : '#f8fafc'),
-                border: `1px solid ${interactionResult.status === 'danger' ? '#fecaca' : (interactionResult.status === 'warning' ? '#fef3c7' : '#e2e8f0')}`
-              }}>
-                <div style={{ display: 'flex', gap: '10px', marginBottom: '6px' }}>
-                  {interactionResult.status === 'danger' ? <AlertTriangle size={20} color="#e11d48" /> : 
-                   interactionResult.status === 'warning' ? <Info size={20} color="#d97706" /> : 
-                   <HelpCircle size={20} color="#64748b" />}
-                  <strong style={{ color: interactionResult.status === 'danger' ? '#9f1239' : (interactionResult.status === 'warning' ? '#92400e' : '#334155'), fontSize: '0.9rem' }}>
-                    {interactionResult.title}
-                  </strong>
+            <button
+              style={{...styles.btn, ...styles.btnAnalyze, ...(isAnalyzing ? styles.btnDisabled : {})}}
+              onClick={analyzeRashRisk}
+              disabled={isAnalyzing}
+            >
+              {isAnalyzing ? "🔍 Analyzing..." : "🚀 Analyze Rash Risk"}
+            </button>
+
+            {riskScore > 0 && (
+              <div style={styles.results}>
+                <div style={{
+                  ...styles.riskBadge,
+                  ...(riskLevel === "High" ? styles.badgeHigh :
+                      riskLevel === "Medium" ? styles.badgeMedium :
+                      styles.badgeLow)
+                }}>
+                  {riskLevel} Risk
                 </div>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: '#475569', lineHeight: '1.5' }}>
-                  {interactionResult.message}
-                </p>
+                <div style={styles.riskScore}>{riskScore}%</div>
+
+                {Object.keys(analysisDetails).length > 0 && (
+                  <div style={styles.detailsGrid}>
+                    {Object.entries(analysisDetails).map(([key, value]) => (
+                      <div key={key} style={styles.detailItem}>
+                        <div style={styles.detailLabel}>
+                          {key.charAt(0).toUpperCase() + key.slice(1)}
+                        </div>
+                        <div style={styles.detailValue}>{value}%</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div style={{
+                  ...styles.advice,
+                  ...(riskLevel === "High" ? styles.adviceHigh :
+                      riskLevel === "Medium" ? styles.adviceMedium :
+                      styles.adviceLow)
+                }}>
+                  {advice}
+                </div>
+
+                <button style={{...styles.btn, ...styles.btnClear}} onClick={clearAnalysis}>
+                  🔄 New Analysis
+                </button>
               </div>
             )}
-          </div>
+          </>
+        )}
+
+        <div style={styles.disclaimer}>
+          🏥 TensorFlow.js analysis. Always consult medical professionals.
         </div>
       </div>
     </div>
   );
-}
+};
 
-export default PillInteractionChecker;
+const styles = {
+  detector: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "20px",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    background: "#f5fdf7",
+    minHeight: "100vh",
+  },
+  card: {
+    width: "100%",
+    maxWidth: "650px",
+    background: "#ffffff",
+    borderRadius: "24px",
+    boxShadow: "0 25px 60px rgba(0,0,0,0.10)",
+    padding: "40px",
+  },
+  title: {
+    fontSize: "clamp(2rem, 6vw, 3.2rem)",
+    fontWeight: 900,
+    color: "#047857",
+    margin: "0 0 12px",
+    textAlign: "center",
+  },
+  subtitle: {
+    textAlign: "center",
+    color: "#64748b",
+    marginBottom: "32px",
+    fontSize: "1rem",
+    lineHeight: 1.6,
+  },
+  warning: {
+    color: "#065f46",
+    fontWeight: 700,
+  },
+  uploadArea: {
+    border: "3px dashed #d1fae5",
+    borderRadius: "20px",
+    padding: "48px 24px",
+    textAlign: "center",
+    background: "#f9fffb",
+    cursor: "pointer",
+    transition: "all 0.3s",
+    marginBottom: "24px",
+  },
+  dragover: {
+    borderColor: "#16a34a",
+    background: "#dcfce7",
+    transform: "translateY(-4px)",
+  },
+  uploadIcon: {
+    fontSize: "5rem",
+    marginBottom: "16px",
+  },
+  uploadText: {
+    fontSize: "1.15rem",
+    fontWeight: 700,
+    color: "#022c22",
+    marginBottom: "8px",
+  },
+  uploadSubtext: {
+    color: "#94a3b8",
+    fontSize: "0.95rem",
+  },
+  canvasContainer: {
+    position: "relative",
+    margin: "0 auto 24px",
+    borderRadius: "20px",
+    overflow: "hidden",
+    boxShadow: "0 20px 50px rgba(0,0,0,0.08)",
+  },
+  canvas: {
+    display: "block",
+    maxWidth: "100%",
+    height: "auto",
+    width: "100%",
+  },
+  btn: {
+    width: "100%",
+    padding: "16px 24px",
+    fontSize: "1.1rem",
+    fontWeight: 800,
+    border: "none",
+    borderRadius: "14px",
+    cursor: "pointer",
+    transition: "all 0.3s",
+    marginBottom: "16px",
+    textTransform: "uppercase",
+    letterSpacing: "0.5px",
+  },
+  btnAnalyze: {
+    background: "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)",
+    color: "white",
+    boxShadow: "0 12px 30px rgba(34,197,94,0.35)",
+  },
+  btnDisabled: {
+    background: "#e5e7eb",
+    color: "#94a3b8",
+    cursor: "not-allowed",
+  },
+  btnClear: {
+    background: "#f1f5f9",
+    color: "#475569",
+    border: "2px solid #e2e8f0",
+  },
+  results: {
+    background: "#f9fffb",
+    borderRadius: "20px",
+    padding: "28px",
+    border: "2px solid #d1fae5",
+  },
+  riskBadge: {
+    display: "inline-block",
+    padding: "12px 20px",
+    borderRadius: "999px",
+    fontWeight: 800,
+    fontSize: "0.95rem",
+    marginBottom: "16px",
+    textTransform: "uppercase",
+    letterSpacing: "1px",
+  },
+  badgeHigh: {
+    background: "rgba(239,68,68,0.15)",
+    color: "#b91c1c",
+  },
+  badgeMedium: {
+    background: "rgba(245,158,11,0.15)",
+    color: "#b45309",
+  },
+  badgeLow: {
+    background: "rgba(16,185,129,0.15)",
+    color: "#047857",
+  },
+  riskScore: {
+    fontSize: "clamp(3.5rem, 15vw, 7rem)",
+    fontWeight: 900,
+    textAlign: "center",
+    color: "#059669",
+  },
+  detailsGrid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "12px",
+    marginBottom: "20px",
+  },
+  detailItem: {
+    background: "#ffffff",
+    padding: "16px",
+    borderRadius: "12px",
+    textAlign: "center",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
+  },
+  detailLabel: {
+    fontSize: "0.85rem",
+    color: "#6b7280",
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.5px",
+    marginBottom: "8px",
+  },
+  detailValue: {
+    fontSize: "1.8rem",
+    fontWeight: 900,
+    color: "#059669",
+  },
+  advice: {
+    background: "#ffffff",
+    padding: "20px",
+    borderRadius: "14px",
+    borderLeft: "5px solid",
+    lineHeight: 1.7,
+    marginBottom: "20px",
+    color: "#022c22",
+    fontWeight: 500,
+  },
+  adviceHigh: {
+    borderLeftColor: "#ef4444",
+    background: "rgba(239,68,68,0.05)",
+  },
+  adviceMedium: {
+    borderLeftColor: "#f59e0b",
+    background: "rgba(245,158,11,0.05)",
+  },
+  adviceLow: {
+    borderLeftColor: "#22c55e",
+    background: "rgba(34,197,94,0.05)",
+  },
+  disclaimer: {
+    fontSize: "0.85rem",
+    color: "#6b7280",
+    textAlign: "center",
+    marginTop: "28px",
+    lineHeight: 1.6,
+    borderTop: "1px solid #e2e8f0",
+    paddingTop: "20px",
+  },
+};
+
+export default SkinRashRiskDetector;

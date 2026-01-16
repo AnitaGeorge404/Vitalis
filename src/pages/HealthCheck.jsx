@@ -37,6 +37,12 @@ function HealthCheck() {
       route: '/health/respi-track'
     },
     {
+      title: 'Skin Rash Risk Detector',
+      description: 'Analyze skin rashes for potential health risks',
+      icon: Bandage,
+      route: '/health/skin-rash-risk'
+    },
+    {
       title: 'Symptom Sieve',
       description: 'Quick health assessment and symptom evaluation',
       icon: Hospital,
