@@ -1,596 +1,183 @@
-/* ============================================
-   CPR COACH - STEP-BASED DESIGN
-   Emergency UI: Command Interface Style
-   No scrolling, full-screen, sticky buttons
-   ============================================ */
-
-/* Container - Full Screen */
+/* CPR Coach - Modern Light Theme Design */
 .cpr-coach-container {
   max-width: 100%;
   margin: 0;
   padding: 0;
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  color: #ffffff;
-  overflow: hidden;
-}
-
-/* Header - Compact with Progress */
-.cpr-header {
-  flex-shrink: 0;
-  background-color: #0f3460;
-  padding: 1rem 1.5rem;
-  border-bottom: 3px solid #e94560;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-}
-
-.cpr-header h1 {
-  font-size: 1.75rem;
-  color: #ffffff;
-  margin: 0;
-  font-weight: 700;
-}
-
-.cpr-progress {
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
-  color: #a8dadc;
-  font-weight: 500;
-}
-
-/* Step Content - Flex Container */
-.cpr-step-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 2rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  color: #1e293b;
   overflow-y: auto;
 }
 
-/* ============================================
-   STEP 0: IDLE SCREEN
-   ============================================ */
-.cpr-idle-screen {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  max-width: 600px;
-  margin: 0 auto;
-  text-align: center;
+/* Modern Header */
+.cpr-header {
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.idle-icon {
-  font-size: 5rem;
-  margin-bottom: 1rem;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-}
-
-.cpr-idle-screen h2 {
-  font-size: 2.5rem;
-  margin: 0 0 0.5rem 0;
-  color: #ffffff;
-}
-
-.idle-subtitle {
-  font-size: 1.125rem;
-  color: #a8dadc;
-  margin-bottom: 2rem;
-}
-
-.disclaimer-box {
-  background-color: rgba(233, 69, 96, 0.15);
-  border: 2px solid #e94560;
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  text-align: left;
-}
-
-.disclaimer-box h3 {
-  margin: 0 0 1rem 0;
-  color: #e94560;
-  font-size: 1.125rem;
-}
-
-.disclaimer-box ul {
-  margin: 0;
-  padding-left: 1.5rem;
-  line-height: 1.8;
-}
-
-.disclaimer-box li {
-  margin-bottom: 0.5rem;
-  color: #ffffff;
-}
-
-/* Demo Mode Toggle */
-.demo-toggle {
-  background-color: rgba(168, 218, 220, 0.1);
-  border: 2px solid #a8dadc;
-  border-radius: 0.75rem;
-  padding: 1rem;
-  margin-bottom: 2rem;
-  width: 100%;
-}
-
-.demo-toggle label {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  cursor: pointer;
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.demo-toggle input[type="checkbox"] {
-  width: 1.5rem;
-  height: 1.5rem;
-  cursor: pointer;
-}
-
-.demo-hint {
-  margin: 0.5rem 0 0 2.25rem;
-  font-size: 0.875rem;
-  color: #a8dadc;
-}
-
-/* ============================================
-   STEP 1: POSITIONING SCREEN
-   ============================================ */
-.positioning-screen {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  max-width: 800px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-.positioning-screen h2 {
+.cpr-header h1 {
   font-size: 2rem;
-  margin: 0 0 2rem 0;
-  text-align: center;
-  color: #ffffff;
-}
-
-.positioning-instructions {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.instruction-card {
-  background-color: rgba(15, 52, 96, 0.6);
-  border: 2px solid #a8dadc;
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  text-align: center;
-}
-
-.instruction-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-}
-
-.instruction-card h3 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.25rem;
-  color: #ffffff;
-}
-
-.instruction-card p {
+  color: #0f172a;
   margin: 0;
-  color: #a8dadc;
-  font-size: 0.9375rem;
-}
-
-.camera-toggle {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.camera-hint {
-  margin: 0.5rem 0 0 0;
-  font-size: 0.875rem;
-  color: #a8dadc;
-}
-
-.camera-preview {
-  background-color: #000;
-  border-radius: 0.75rem;
-  padding: 1rem;
-  margin-bottom: 2rem;
-  max-height: 400px;
-  overflow: hidden;
-}
-
-.error-text {
-  color: #e94560;
-  text-align: center;
-  margin-top: 1rem;
-  font-size: 0.875rem;
-}
-
-/* ============================================
-   STEP 2: ACTIVE CPR SCREEN
-   ============================================ */
-.cpr-active-screen {
-  padding: 1rem;
-  align-items: center;
-  justify-content: center;
-}
-
-.compression-counter-section {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.counter-label {
-  font-size: 1.125rem;
-  color: #a8dadc;
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.counter-value {
-  font-size: 6rem;
   font-weight: 800;
-  color: #e94560;
-  line-height: 1;
-  margin-bottom: 0.5rem;
-  text-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+  letter-spacing: -0.02em;
 }
 
-.counter-duration {
-  font-size: 1.5rem;
-  color: #ffffff;
+.cpr-subtitle {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin: 0.5rem 0 0 0;
+  font-weight: 500;
+}
+
+.disclaimer-banner {
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  color: #dc2626;
+  padding: 1rem 2rem;
   font-weight: 600;
+  font-size: 0.9rem;
+  text-align: center;
+  border-bottom: 2px solid #fecaca;
+  border-top: 1px solid #fecaca;
 }
 
-/* Visual Pulse Indicator */
-.visual-pulse {
-  position: relative;
-  width: 150px;
-  height: 150px;
-  margin: 2rem auto;
+/* Main Content - Grid Layout */
+.cpr-main-content {
+/* Main Content - Grid Layout */
+.cpr-main-content {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+/* Camera Section - Modern Light */
+.cpr-camera-section {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  overflow: hidden;
+  border-right: 1px solid #e2e8f0;
 }
 
-.pulse-ring {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border: 4px solid #e94560;
-  border-radius: 50%;
-  background-color: rgba(233, 69, 96, 0.1);
-}
-
-.visual-pulse.pulsing .pulse-ring {
-  animation: pulse-ring 0.545s infinite;
-}
-
-@keyframes pulse-ring {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 0.8;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-.pulse-text {
-  font-size: 3rem;
-  z-index: 1;
-}
-
-/* Active Feedback */
-.active-feedback {
-  max-width: 600px;
-  width: 100%;
-  margin: 0 auto 2rem auto;
-}
-
-/* Demo Indicator */
-.demo-indicator {
-  background-color: rgba(168, 218, 220, 0.2);
-  border: 2px solid #a8dadc;
-  border-radius: 0.75rem;
-  padding: 1rem;
-  margin: 1rem auto;
-  max-width: 600px;
-  text-align: center;
-}
-
-.demo-indicator p {
-  margin: 0.25rem 0;
-  font-size: 0.9375rem;
-  color: #ffffff;
-}
-
-.demo-stats {
-  color: #a8dadc;
-  font-size: 0.875rem;
-}
-
-/* Rhythm Info */
-.rhythm-info {
-  text-align: center;
-  margin: 1rem 0;
-}
-
-.rhythm-info p {
-  margin: 0.5rem 0;
-  font-size: 1rem;
-  color: #a8dadc;
-}
-
-/* ============================================
-   STEP 3: SUMMARY SCREEN
-   ============================================ */
-.summary-screen {
-  flex: 1;
+/* Control Panel - Clean Light Design */
+.cpr-control-panel {
+  background: #ffffff;
+  padding: 2rem;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  max-width: 700px;
-  margin: 0 auto;
-  text-align: center;
-}
-
-.summary-icon {
-  font-size: 5rem;
-  margin-bottom: 1rem;
-}
-
-.summary-screen h2 {
-  font-size: 2.5rem;
-  margin: 0 0 2rem 0;
-  color: #ffffff;
-}
-
-.summary-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 1.5rem;
-  width: 100%;
-  margin-bottom: 2rem;
+  overflow-y: auto;
+  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.03);
 }
 
-.stat-card {
-  background-color: rgba(15, 52, 96, 0.6);
-  border: 2px solid #a8dadc;
-  border-radius: 0.75rem;
-  padding: 1.5rem;
+.cpr-control-panel::-webkit-scrollbar {
+  width: 8px;
 }
 
-.stat-value {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: #e94560;
-  margin-bottom: 0.5rem;
+.cpr-control-panel::-webkit-scrollbar-track {
+  background: #f8fafc;
 }
 
-.stat-label {
-  font-size: 0.875rem;
-  color: #a8dadc;
+.cpr-control-panel::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.cpr-control-panel::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.cpr-reset-button {
+  padding: 1rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.summary-message {
-  background-color: rgba(168, 218, 220, 0.15);
-  border: 2px solid #a8dadc;
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  width: 100%;
-}
-
-.summary-message p {
-  margin: 0;
-  font-size: 1.125rem;
-  color: #ffffff;
-}
-
-.summary-notes {
-  width: 100%;
-  margin-bottom: 2rem;
-}
-
-/* ============================================
-   BUTTONS - PRIMARY & SECONDARY
-   ============================================ */
-.cpr-primary-button {
-  width: 100%;
-  max-width: 400px;
-  padding: 1.25rem 2rem;
-  font-size: 1.25rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, #e94560 0%, #d63447 100%);
-  color: #ffffff;
-  border: none;
-  border-radius: 0.75rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  min-height: 64px;
-}
-
-.cpr-primary-button:hover {
+.cpr-reset-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(233, 69, 96, 0.4);
-  background: linear-gradient(135deg, #ff6b81 0%, #e94560 100%);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.3);
+  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
 }
 
-.cpr-primary-button:active {
+.cpr-reset-button:active {
   transform: translateY(0);
 }
 
-.secondary-button {
-  padding: 1rem 2rem;
-  font-size: 1rem;
-  font-weight: 600;
-  background: linear-gradient(135deg, #a8dadc 0%, #457b9d 100%);
-  color: #ffffff;
-  border: none;
-  border-radius: 0.75rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-  min-height: 64px;
+/* Responsive Design - Modern */
+@media (max-width: 1200px) {
+  .cpr-main-content {
+    grid-template-columns: 1fr 360px;
+  }
+
+  .cpr-control-panel {
+    padding: 1.5rem;
+    gap: 1.25rem;
+  }
 }
 
-.secondary-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 10px rgba(168, 218, 220, 0.4);
-  background: linear-gradient(135deg, #cfe8ef 0%, #a8dadc 100%);
-}
-
-.secondary-button:active {
-  transform: translateY(0);
-}
-
-/* Action Buttons - Sticky Bottom */
-.cpr-action-buttons {
-  position: sticky;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(0deg, #1a1a2e 80%, transparent 100%);
-  padding: 1.5rem 2rem;
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-top: auto;
-}
-
-.cpr-action-buttons button {
-  flex: 1;
-  min-width: 150px;
-  max-width: 250px;
-}
-
-.stop-button {
-  background: linear-gradient(135deg, #e94560 0%, #b03052 100%);
-}
-
-.stop-button:hover {
-  background: linear-gradient(135deg, #ff6b81 0%, #e94560 100%);
-}
-
-/* ============================================
-   RESPONSIVE DESIGN
-   ============================================ */
 @media (max-width: 768px) {
+  .cpr-main-content {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+  }
+
+  .cpr-control-panel {
+    max-height: 45vh;
+    border-right: none;
+    border-top: 1px solid #e2e8f0;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.03);
+  }
+
   .cpr-header h1 {
     font-size: 1.5rem;
   }
 
-  .cpr-step-content {
-    padding: 1rem;
+  .cpr-subtitle {
+    font-size: 0.875rem;
   }
 
-  .counter-value {
-    font-size: 4rem;
-  }
-
-  .counter-duration {
-    font-size: 1.25rem;
-  }
-
-  .idle-icon {
-    font-size: 4rem;
-  }
-
-  .cpr-idle-screen h2 {
-    font-size: 2rem;
-  }
-
-  .positioning-instructions {
-    grid-template-columns: 1fr;
-  }
-
-  .summary-stats {
-    grid-template-columns: 1fr;
-  }
-
-  .cpr-action-buttons {
-    padding: 1rem;
+  .disclaimer-banner {
+    font-size: 0.8rem;
+    padding: 0.75rem 1rem;
   }
 }
 
 @media (max-width: 480px) {
   .cpr-header {
-    padding: 0.75rem 1rem;
+    padding: 1rem 1.25rem;
   }
 
   .cpr-header h1 {
     font-size: 1.25rem;
   }
 
-  .counter-value {
-    font-size: 3rem;
+  .cpr-control-panel {
+    padding: 1rem;
   }
 
-  .cpr-primary-button {
-    font-size: 1rem;
-    padding: 1rem 1.5rem;
+  .cpr-reset-button {
+    font-size: 0.9rem;
+    padding: 0.875rem 1.25rem;
   }
-
-  .secondary-button {
-    font-size: 0.875rem;
-    padding: 0.75rem 1.5rem;
-  }
-
-  .visual-pulse {
-    width: 120px;
-    height: 120px;
-  }
-
-  .pulse-text {
-    font-size: 2rem;
-  }
-}
-
-/* ============================================
-   ACCESSIBILITY
-   ============================================ */
-button:focus-visible {
-  outline: 3px solid #a8dadc;
-  outline-offset: 2px;
-}
-
-.cpr-coach-container * {
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* High Contrast Text */
-.cpr-coach-container {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
