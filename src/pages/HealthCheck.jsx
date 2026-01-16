@@ -13,8 +13,8 @@ function HealthCheck() {
   const [currentCheck, setCurrentCheck] = useState(null)
   const healthFeatures = [
     {
-      title: 'Pill Identifier',
-      description: 'Identify medications by photo, shape, color, or imprint',
+      title: 'Pill Interaction Checker',
+      description: 'Identify interactions between medications',
       icon: Pill,
       route: '/health/pill-identifier'
     },

@@ -1,333 +1,143 @@
-import { useState, useRef } from 'react'
-import { Camera, Upload, X, AlertCircle, Info, Pill } from 'lucide-react'
-import './PillIdentifier.css'
+import React, { useState, useEffect } from "react";
+import { Pill, AlertTriangle, CheckCircle2, Search, Plus, Info, Trash2, ShieldCheck } from "lucide-react";
 
-/**
- * Pill Identifier
- * Helps identify pills by shape, color, imprint, and image
- */
-function PillIdentifier() {
-  const [uploadedImage, setUploadedImage] = useState(null)
-  const [formData, setFormData] = useState({
-    shape: '',
-    color: '',
-    imprint: '',
-    size: ''
-  })
-  const [results, setResults] = useState(null)
-  const [isSearching, setIsSearching] = useState(false)
-  const fileInputRef = useRef(null)
+function PillInteractionChecker() {
+  const [currentMeds, setCurrentMeds] = useState(["Aspirin", "Lisinopril"]);
+  const [newMed, setNewMed] = useState("");
+  const [interactionResult, setInteractionResult] = useState(null);
 
-  const pillShapes = [
-    'Round', 'Oval', 'Capsule', 'Oblong', 'Square', 
-    'Rectangle', 'Diamond', 'Pentagon', 'Hexagon', 'Triangle'
-  ]
-
-  const pillColors = [
-    'White', 'Yellow', 'Orange', 'Pink', 'Red', 
-    'Purple', 'Blue', 'Green', 'Brown', 'Gray', 
-    'Black', 'Beige', 'Multicolor'
-  ]
-
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setUploadedImage(reader.result)
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  const handleInputChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }))
-  }
-
-  const clearImage = () => {
-    setUploadedImage(null)
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
-    }
-  }
-
-  const handleIdentify = () => {
-    setIsSearching(true)
+  // Logic to simulate drug-to-drug interaction database
+  const checkInteractions = () => {
+    if (!newMed) return;
     
-    // Simulate API call to pill identification service
-    setTimeout(() => {
-      setResults({
-        matches: [
-          {
-            name: 'Acetaminophen 500mg',
-            brand: 'Tylenol',
-            generic: 'Acetaminophen',
-            imprint: 'TYLENOL 500',
-            shape: formData.shape || 'Capsule',
-            color: formData.color || 'White',
-            uses: 'Pain relief and fever reduction',
-            strength: '500mg',
-            image: '/pill-sample.png'
-          },
-          {
-            name: 'Ibuprofen 200mg',
-            brand: 'Advil',
-            generic: 'Ibuprofen',
-            imprint: 'I-2',
-            shape: formData.shape || 'Round',
-            color: formData.color || 'White',
-            uses: 'Pain relief, anti-inflammatory',
-            strength: '200mg',
-            image: '/pill-sample.png'
-          }
-        ],
-        confidence: 'high'
-      })
-      setIsSearching(false)
-    }, 2000)
-  }
-
-  const resetSearch = () => {
-    setFormData({
-      shape: '',
-      color: '',
-      imprint: '',
-      size: ''
-    })
-    setUploadedImage(null)
-    setResults(null)
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
+    const meds = [...currentMeds, newMed].map(m => m.toLowerCase().trim());
+    
+    // Example Logic: High-risk combinations
+    if (meds.includes("aspirin") && meds.includes("ibuprofen")) {
+      setInteractionResult({
+        status: "danger",
+        title: "High Risk: NSAID Conflict",
+        message: "Taking Aspirin and Ibuprofen together can increase the risk of stomach ulcers and interfere with heart protection."
+      });
+    } else if (meds.includes("lisinopril") && meds.includes("spironolactone")) {
+      setInteractionResult({
+        status: "warning",
+        title: "Moderate Risk: Potassium Alert",
+        message: "This combination may significantly increase potassium levels. Periodic blood tests are recommended."
+      });
+    } else {
+      setInteractionResult({
+        status: "safe",
+        title: "No Common Interactions",
+        message: "No major conflicts found between these medications in our database. Always confirm with your pharmacist."
+      });
     }
-  }
+  };
 
   return (
-    <div className="pill-identifier-container">
-      <div className="pill-header">
-        <div className="header-icon">
-          <Pill size={40} />
-        </div>
-        <div>
-          <h1>💊 Pill Identifier</h1>
-          <p className="subtitle">Identify pills by appearance, imprint, or photo</p>
-        </div>
+    <div className="vital-scan-container" style={{ background: '#f8fafc', padding: '20px', maxWidth: '1000px', margin: '0 auto' }}>
+      
+      {/* Small Header */}
+      <div style={{ marginBottom: '20px', borderLeft: '4px solid #3b82f6', paddingLeft: '15px' }}>
+        <h1 style={{ fontSize: '1.4rem', color: '#1e293b', margin: 0 }}>Interaction Guard</h1>
+        <p style={{ color: '#64748b', fontSize: '0.85rem' }}>Verify safety before taking new medication.</p>
       </div>
 
-      <div className="disclaimer-box">
-        <AlertCircle size={20} />
-        <div>
-          <strong>Important:</strong> This tool provides general information only. 
-          Always consult a healthcare professional or pharmacist for medication advice. 
-          If you're unsure about any medication, contact your doctor or local pharmacy.
-        </div>
-      </div>
-
-      <div className="pill-content">
-        {/* Image Upload Section */}
-        <div className="upload-section">
-          <h2>📸 Upload Pill Image (Optional)</h2>
-          <p className="section-subtitle">Take a clear photo of the pill for better identification</p>
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: window.innerWidth > 800 ? '320px 1fr' : '1fr', 
+        gap: '20px',
+        alignItems: 'start' 
+      }}>
+        
+        {/* LEFT: Current Medications Card */}
+        <div style={{ background: '#ffffff', borderRadius: '16px', padding: '20px', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+          <h2 style={{ fontSize: '0.9rem', marginBottom: '16px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.025em', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <ShieldCheck size={16} color="#3b82f6" /> My Active Meds
+          </h2>
           
-          <div className="upload-area">
-            {uploadedImage ? (
-              <div className="image-preview">
-                <img src={uploadedImage} alt="Uploaded pill" />
-                <button className="remove-image-btn" onClick={clearImage}>
-                  <X size={20} />
-                </button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {currentMeds.map((med, i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
+                <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#334155' }}>{med}</span>
+                <Trash2 size={14} color="#94a3b8" style={{ cursor: 'pointer' }} onClick={() => setCurrentMeds(currentMeds.filter((_, idx) => idx !== i))} />
               </div>
-            ) : (
-              <div className="upload-placeholder" onClick={() => fileInputRef.current?.click()}>
-                <Camera size={48} />
-                <p>Click to upload or take photo</p>
-                <span className="upload-hint">Supports: JPG, PNG, HEIC</span>
+            ))}
+            
+            <div style={{ position: 'relative', marginTop: '8px' }}>
+              <Plus size={14} style={{ position: 'absolute', left: '10px', top: '10px', color: '#94a3b8' }} />
+              <input 
+                placeholder="Add current medicine..." 
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && e.target.value) {
+                    setCurrentMeds([...currentMeds, e.target.value]);
+                    e.target.value = "";
+                  }
+                }}
+                style={{ width: '100%', padding: '8px 8px 8px 30px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', outline: 'none' }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT: The Checker Card */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ background: '#ffffff', borderRadius: '16px', padding: '24px', border: '1px solid #e2e8f0' }}>
+            <h3 style={{ fontSize: '1rem', color: '#1e293b', marginBottom: '16px' }}>Check New Medication</h3>
+            
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+              <div style={{ position: 'relative', flex: 1 }}>
+                <Search size={18} style={{ position: 'absolute', left: '12px', top: '12px', color: '#94a3b8' }} />
+                <input
+                  placeholder="e.g. Ibuprofen, Warfarin..."
+                  value={newMed}
+                  onChange={(e) => setNewMed(e.target.value)}
+                  style={{ width: '100%', padding: '12px 12px 12px 40px', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '0.9rem', outline: 'none' }}
+                />
+              </div>
+              <button 
+                onClick={checkInteractions} 
+                style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '0 24px', borderRadius: '10px', fontWeight: '700', cursor: 'pointer', transition: '0.2s opacity' }}
+                onMouseOver={(e) => e.target.style.opacity = '0.9'}
+                onMouseOut={(e) => e.target.style.opacity = '1'}
+              >
+                Check
+              </button>
+            </div>
+
+            {interactionResult && (
+              <div style={{ 
+                padding: '16px', 
+                borderRadius: '12px', 
+                background: interactionResult.status === 'danger' ? '#fff1f2' : (interactionResult.status === 'warning' ? '#fffbeb' : '#f0fdf4'),
+                border: `1px solid ${interactionResult.status === 'danger' ? '#fecaca' : (interactionResult.status === 'warning' ? '#fef3c7' : '#bbf7d0')}`
+              }}>
+                <div style={{ display: 'flex', gap: '10px', marginBottom: '6px' }}>
+                  {interactionResult.status === 'danger' ? <AlertTriangle size={20} color="#e11d48" /> : 
+                   interactionResult.status === 'warning' ? <Info size={20} color="#d97706" /> : 
+                   <CheckCircle2 size={20} color="#16a34a" />}
+                  <strong style={{ color: interactionResult.status === 'danger' ? '#9f1239' : (interactionResult.status === 'warning' ? '#92400e' : '#166534'), fontSize: '0.9rem' }}>
+                    {interactionResult.title}
+                  </strong>
+                </div>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: interactionResult.status === 'danger' ? '#be123c' : (interactionResult.status === 'warning' ? '#b45309' : '#15803d'), lineHeight: '1.5' }}>
+                  {interactionResult.message}
+                </p>
               </div>
             )}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              onChange={handleImageUpload}
-              style={{ display: 'none' }}
-            />
           </div>
 
-          {!uploadedImage && (
-            <button className="upload-btn" onClick={() => fileInputRef.current?.click()}>
-              <Upload size={20} />
-              Choose File
-            </button>
-          )}
-        </div>
-
-        {/* Manual Input Section */}
-        <div className="manual-input-section">
-          <h2>🔍 Pill Characteristics</h2>
-          <p className="section-subtitle">Enter details visible on the pill</p>
-
-          <div className="input-grid">
-            <div className="input-group">
-              <label>Shape</label>
-              <select 
-                value={formData.shape}
-                onChange={(e) => handleInputChange('shape', e.target.value)}
-              >
-                <option value="">Select shape</option>
-                {pillShapes.map(shape => (
-                  <option key={shape} value={shape}>{shape}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="input-group">
-              <label>Color</label>
-              <select 
-                value={formData.color}
-                onChange={(e) => handleInputChange('color', e.target.value)}
-              >
-                <option value="">Select color</option>
-                {pillColors.map(color => (
-                  <option key={color} value={color}>{color}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="input-group full-width">
-              <label>Imprint/Text on Pill</label>
-              <input
-                type="text"
-                placeholder="e.g., 'TYLENOL 500' or 'L544'"
-                value={formData.imprint}
-                onChange={(e) => handleInputChange('imprint', e.target.value)}
-              />
-              <span className="input-hint">Any letters, numbers, or symbols on the pill</span>
-            </div>
-
-            <div className="input-group">
-              <label>Approximate Size</label>
-              <select 
-                value={formData.size}
-                onChange={(e) => handleInputChange('size', e.target.value)}
-              >
-                <option value="">Select size</option>
-                <option value="tiny">Tiny (3-5mm)</option>
-                <option value="small">Small (5-8mm)</option>
-                <option value="medium">Medium (8-12mm)</option>
-                <option value="large">Large (12-18mm)</option>
-                <option value="xlarge">Extra Large (18mm+)</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="action-buttons">
-            <button 
-              className="identify-btn" 
-              onClick={handleIdentify}
-              disabled={isSearching || (!uploadedImage && !formData.shape && !formData.color && !formData.imprint)}
-            >
-              {isSearching ? (
-                <>
-                  <div className="spinner-small"></div>
-                  Searching...
-                </>
-              ) : (
-                <>
-                  <Pill size={20} />
-                  Identify Pill
-                </>
-              )}
-            </button>
-            <button className="reset-btn" onClick={resetSearch}>
-              Clear All
-            </button>
+          <div style={{ display: 'flex', gap: '10px', padding: '14px', background: '#eff6ff', borderRadius: '12px', border: '1px solid #dbeafe' }}>
+            <Info size={16} color="#3b82f6" style={{ flexShrink: 0 }} />
+            <p style={{ margin: 0, fontSize: '0.75rem', color: '#1e40af', lineHeight: '1.4' }}>
+              <strong>Disclaimer:</strong> This database is not exhaustive. Always consult a healthcare professional. In case of emergency, use the <strong>SOS</strong> feature immediately.
+            </p>
           </div>
         </div>
 
-        {/* Results Section */}
-        {results && (
-          <div className="results-section">
-            <h2>🎯 Possible Matches</h2>
-            <div className="confidence-badge">
-              Confidence: <span className={`confidence-${results.confidence}`}>
-                {results.confidence.toUpperCase()}
-              </span>
-            </div>
-
-            <div className="results-grid">
-              {results.matches.map((match, index) => (
-                <div key={index} className="result-card">
-                  <div className="result-header">
-                    <div className="pill-visual">
-                      <div className={`pill-icon ${match.color.toLowerCase()}`}>
-                        <Pill size={32} />
-                      </div>
-                    </div>
-                    <div>
-                      <h3>{match.brand}</h3>
-                      <p className="generic-name">{match.generic}</p>
-                    </div>
-                  </div>
-
-                  <div className="result-details">
-                    <div className="detail-row">
-                      <span className="label">Strength:</span>
-                      <span className="value">{match.strength}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="label">Shape:</span>
-                      <span className="value">{match.shape}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="label">Color:</span>
-                      <span className="value">{match.color}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="label">Imprint:</span>
-                      <span className="value">{match.imprint}</span>
-                    </div>
-                  </div>
-
-                  <div className="usage-info">
-                    <Info size={16} />
-                    <strong>Common Uses:</strong> {match.uses}
-                  </div>
-
-                  <div className="result-actions">
-                    <button className="detail-btn">View Full Details</button>
-                    <button className="save-btn">Save Result</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="results-disclaimer">
-              <AlertCircle size={18} />
-              <p>
-                <strong>Verification Required:</strong> These are possible matches based on visual characteristics. 
-                Always verify with a pharmacist or the medication label. Never take medication without proper identification.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Tips Section */}
-        <div className="tips-section">
-          <h3>💡 Tips for Better Identification</h3>
-          <ul>
-            <li>✓ Take photo in good lighting against a plain background</li>
-            <li>✓ Include any visible text, numbers, or logos on the pill</li>
-            <li>✓ Note the pill's shape, color, and approximate size</li>
-            <li>✓ Check both sides of the pill if there's different imprints</li>
-            <li>✓ If split/broken, note the original shape before breaking</li>
-          </ul>
-        </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default PillIdentifier
+export default PillInteractionChecker;
