@@ -527,7 +527,15 @@ def main():
     """Main entry point - reads JSON from stdin, outputs JSON to stdout"""
     try:
         # Read input from stdin
-        input_data = json.loads(sys.stdin.read())
+        input_str = sys.stdin.read()
+        
+        if not input_str.strip():
+            result = {'error': True, 'message': 'No input data received'}
+            print(json.dumps(result), flush=True)
+            sys.exit(1)
+        
+        # Parse JSON
+        input_data = json.loads(input_str)
         
         # Extract image and previous data
         image_data = input_data.get('image', '')
@@ -540,17 +548,23 @@ def main():
             analyzer = WoundAnalyzer()
             result = analyzer.analyze(image_data, previous_wound_data)
         
-        # Output result as JSON
-        print(json.dumps(result))
+        # Output result as JSON with flush
+        print(json.dumps(result), flush=True)
+        sys.stdout.flush()
         sys.exit(0)
         
-    except json.JSONDecodeError:
-        error_result = {'error': True, 'message': 'Invalid JSON input'}
-        print(json.dumps(error_result))
+    except json.JSONDecodeError as e:
+        error_result = {'error': True, 'message': f'Invalid JSON input: {str(e)}'}
+        print(json.dumps(error_result), flush=True)
         sys.exit(1)
     except Exception as e:
-        error_result = {'error': True, 'message': f'Unexpected error: {str(e)}'}
-        print(json.dumps(error_result))
+        import traceback
+        error_result = {
+            'error': True, 
+            'message': f'Unexpected error: {str(e)}',
+            'traceback': traceback.format_exc()
+        }
+        print(json.dumps(error_result), flush=True)
         sys.exit(1)
 
 

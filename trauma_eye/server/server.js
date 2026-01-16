@@ -50,13 +50,26 @@ app.post('/api/analyze-wound', async (req, res) => {
     });
 
     // Spawn Python process
-    const pythonPath = 'python'; // Use 'python3' on Unix systems if needed
+    const pythonPath = 'python3'; // Use 'python3' on Unix systems
     const scriptPath = path.join(__dirname, 'trauma_eye.py');
     
     const pythonProcess = spawn(pythonPath, [scriptPath]);
 
     let outputData = '';
     let errorData = '';
+    let isResponseSent = false;
+
+    // Set a timeout for the Python process (30 seconds)
+    const processTimeout = setTimeout(() => {
+      if (!isResponseSent) {
+        pythonProcess.kill('SIGKILL');
+        isResponseSent = true;
+        return res.status(504).json({
+          error: true,
+          message: 'Analysis timeout. Please try with a smaller image or better lighting.'
+        });
+      }
+    }, 30000);
 
     // Collect stdout
     pythonProcess.stdout.on('data', (data) => {
@@ -70,6 +83,14 @@ app.post('/api/analyze-wound', async (req, res) => {
 
     // Handle process completion
     pythonProcess.on('close', (code) => {
+      clearTimeout(processTimeout);
+      
+      if (isResponseSent) {
+        return; // Already sent timeout response
+      }
+      
+      isResponseSent = true;
+      
       if (code !== 0) {
         console.error('Python script error:', errorData);
         return res.status(500).json({
@@ -102,6 +123,11 @@ app.post('/api/analyze-wound', async (req, res) => {
 
     // Handle process errors
     pythonProcess.on('error', (error) => {
+      clearTimeout(processTimeout);
+      
+      if (isResponseSent) return;
+      isResponseSent = true;
+      
       console.error('Failed to start Python process:', error);
       res.status(500).json({
         error: true,
