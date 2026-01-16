@@ -136,24 +136,33 @@ function CPRCoach() {
 
   // Camera & Pose Detection Functions
   const startCamera = async () => {
-    if (!videoRef.current || !canvasRef.current) return;
+    if (!videoRef.current || !canvasRef.current) {
+      console.error('[CPR Coach] Video or canvas ref not available');
+      return;
+    }
     
     try {
       console.log('[CPR Coach] Starting camera...');
+      console.log('[CPR Coach] Video element:', videoRef.current);
+      console.log('[CPR Coach] Canvas element:', canvasRef.current);
       
       // Initialize CPR Analyzer
       cprAnalyzerRef.current = new CPRAnalyzer(
         (isValid, feedback) => {
           setPostureValid(isValid);
           setPostureFeedback(feedback);
+          console.log('[CPR Coach] Posture update:', feedback);
         },
         (count, rate) => {
           // Update compression count from pose detection
           if (cameraEnabled && !simulationMode) {
+            console.log('[CPR Coach] Compression update:', count, 'Rate:', rate);
             setCompressionCount(count);
           }
         }
       );
+
+      console.log('[CPR Coach] CPR Analyzer initialized');
 
       // Initialize Pose Detector
       poseDetectorRef.current = new PoseDetector(
@@ -166,13 +175,16 @@ function CPRCoach() {
         }
       );
 
+      console.log('[CPR Coach] Pose Detector created, starting...');
       await poseDetectorRef.current.start();
       setCameraActive(true);
-      console.log('[CPR Coach] Camera started successfully');
+      console.log('[CPR Coach] Camera started successfully!');
+      setPostureFeedback('Camera active - Position yourself for CPR');
     } catch (error) {
       console.error('[CPR Coach] Camera error:', error);
+      console.error('[CPR Coach] Error message:', error.message);
       setCameraActive(false);
-      setPostureFeedback('Camera unavailable - using manual mode');
+      setPostureFeedback('❌ Camera unavailable - using manual mode');
     }
   };
 
