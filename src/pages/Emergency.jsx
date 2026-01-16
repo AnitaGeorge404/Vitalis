@@ -24,8 +24,8 @@ function Emergency() {
       route: '/emergency/action-cards'
     },
     {
-      title: 'AED Finder',
-      description: 'Locate nearest Automated External Defibrillators',
+      title: 'Resource Locator',
+      description: 'Find nearby AEDs and emergency facilities',
       icon: '🏥',
       route: '/emergency/aed-finder'
     },
