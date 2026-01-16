@@ -1,0 +1,304 @@
+/* ========================================
+   EMERGENCY MODE - PANIC-OPTIMIZED UI
+   Design Goals:
+   - Minimal scrolling
+   - Large tap targets (48px minimum)
+   - High contrast
+   - Fast one-tap access
+   - Control panel feel, not content feed
+   ======================================== */
+
+/* Container */
+.emergency-container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #fee2e2 0%, #fef2f2 100%);
+  padding-bottom: 2rem;
+}
+
+/* ========================================
+   STICKY PRIMARY ACTION BAR (CRITICAL)
+   Always visible, even on scroll
+   ======================================== */
+.emergency-primary-bar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #dc2626;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+.primary-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 80px;
+  padding: 1rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.primary-action-btn:active {
+  transform: scale(0.98);
+}
+
+.emergency-call {
+  background: #ffffff;
+  color: #dc2626;
+}
+
+.emergency-call:hover {
+  background: #fef2f2;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+.start-cpr {
+  background: #7f1d1d;
+  color: #ffffff;
+}
+
+.start-cpr:hover {
+  background: #991b1b;
+  box-shadow: 0 4px 12px rgba(127, 29, 29, 0.4);
+}
+
+/* ========================================
+   EMERGENCY CONTROL PANEL
+   ======================================== */
+.emergency-panel {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.emergency-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #7f1d1d;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ========================================
+   ACTION TILES GRID (2x2 on mobile, 4 columns on desktop)
+   Compact, icon + label, entire tile clickable
+   ======================================== */
+.action-tiles-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.action-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 110px;
+  padding: 1rem;
+  background: #ffffff;
+  border: 2px solid #fecaca;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.action-tile:hover {
+  background: #fef2f2;
+  border-color: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+}
+
+.action-tile:active {
+  transform: scale(0.98);
+}
+
+.tile-icon {
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tile-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #7f1d1d;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* ========================================
+   EMERGENCY NOTES - COMPACT VERSION
+   ======================================== */
+.emergency-notes-compact {
+  margin: 1.5rem 0;
+}
+
+.emergency-notes-compact .emergency-notes {
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+/* ========================================
+   MORE TOOLS - PROGRESSIVE DISCLOSURE
+   ======================================== */
+.more-tools-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #fecaca;
+}
+
+.more-tools-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background: #ffffff;
+  border: 2px solid #fecaca;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #7f1d1d;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.more-tools-toggle:hover {
+  background: #fef2f2;
+  border-color: #dc2626;
+}
+
+.secondary-tools-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.action-tile.secondary {
+  min-height: 100px;
+  opacity: 0.95;
+}
+
+/* ========================================
+   RESPONSIVE - TABLET & DESKTOP
+   ======================================== */
+@media (min-width: 640px) {
+  .emergency-primary-bar {
+    padding: 1.25rem;
+    gap: 1rem;
+  }
+
+  .primary-action-btn {
+    min-height: 90px;
+    font-size: 1.25rem;
+  }
+
+  .action-tiles-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+  }
+
+  .action-tile {
+    min-height: 120px;
+  }
+
+  .tile-icon svg {
+    width: 40px;
+    height: 40px;
+  }
+
+  .tile-label {
+    font-size: 1.05rem;
+  }
+
+  .secondary-tools-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .emergency-panel {
+    padding: 2rem 1.5rem;
+  }
+
+  .emergency-title {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+}
+
+/* ========================================
+   ACCESSIBILITY & TOUCH OPTIMIZATION
+   ======================================== */
+
+/* Minimum touch target size: 48px */
+.action-tile,
+.primary-action-btn,
+.more-tools-toggle {
+  min-height: 48px;
+  min-width: 48px;
+}
+
+/* Prevent accidental double-tap zoom on iOS */
+.action-tile,
+.primary-action-btn,
+.more-tools-toggle {
+  touch-action: manipulation;
+}
+
+/* High contrast focus states for accessibility */
+.action-tile:focus-visible,
+.primary-action-btn:focus-visible,
+.more-tools-toggle:focus-visible {
+  outline: 3px solid #dc2626;
+  outline-offset: 2px;
+}
+
+/* Disable text selection on buttons (prevents accidental selection during panic) */
+.action-tile,
+.primary-action-btn,
+.more-tools-toggle {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+/* Fast tap response - reduce delay */
+* {
+  -webkit-tap-highlight-color: rgba(220, 38, 38, 0.2);
+}
+
+/* ========================================
+   PRINT STYLES (Emergency Card Printing)
+   ======================================== */
+@media print {
+  .emergency-primary-bar,
+  .more-tools-section {
+    display: none;
+  }
+
+  .action-tiles-grid {
+    grid-template-columns: repeat(2, 1fr);
+    page-break-inside: avoid;
+  }
+}

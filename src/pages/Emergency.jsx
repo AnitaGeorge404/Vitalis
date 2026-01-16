@@ -7,7 +7,7 @@ import '../styles/cards.css'
 
 /**
  * Emergency Mode Page
- * Displays all emergency-related features as cards
+ * Displays all emergency-related features as compact cards
  */
 function Emergency() {
   const emergencyFeatures = [
@@ -53,18 +53,18 @@ function Emergency() {
     <div className="page-container">
       <SafetyBanner variant="emergency" />
 
-      <div className="page-header emergency-header" style={{ marginTop: '1rem' }}>
+      <div className="page-header emergency-header compact-header">
         <h1 className="page-title">Emergency Mode</h1>
         <p className="page-subtitle">
           Quick access to life-saving tools and guidance
         </p>
       </div>
 
-      <div style={{ marginBottom: '2rem' }}>
+      <div className="compact-section">
         <EmergencyCallButton emergencyNumber="911" />
       </div>
 
-      <div style={{ marginBottom: '2rem' }}>
+      <div className="compact-section">
         <EmergencyNotes sessionId="emergency_main" />
       </div>
 

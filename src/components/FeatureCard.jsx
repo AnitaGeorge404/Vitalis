@@ -22,8 +22,10 @@ function FeatureCard({ title, description, icon: Icon, route }) {
       <div className="card-icon">
         {Icon && <Icon size={32} strokeWidth={1.5} />}
       </div>
-      <h3 className="card-title">{title}</h3>
-      <p className="card-description">{description}</p>
+      <div className="card-content">
+        <h3 className="card-title">{title}</h3>
+        <p className="card-description">{description}</p>
+      </div>
       <div className="card-arrow">
         <ChevronRight size={20} />
       </div>
