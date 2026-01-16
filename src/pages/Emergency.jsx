@@ -52,12 +52,6 @@ function Emergency() {
       description: 'Real-time emergency guidance chatbot for critical situations',
       icon: '🤖',
       route: '/emergency/chatbot'
-    },
-    {
-      title: 'Emergency Voice Guidance',
-      description: 'Hands-free voice-guided emergency assistance',
-      icon: '🎤',
-      route: '/emergency/voice-guidance'
     }
   ]
 

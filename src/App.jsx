@@ -12,7 +12,6 @@ import TraumaTrack from './emergency/TraumaTrack'
 import BurnHelp from './emergency/BurnHelp'
 import EmergencyContacts from './emergency/EmergencyContacts'
 import EmergencyChatbot from './emergency/EmergencyChatbot'
-import VoiceGuidance from './emergency/VoiceGuidance'
 
 // Health check feature pages
 import WoundWatchHealth from './health/WoundWatch'
@@ -40,9 +39,6 @@ function App() {
           <Route path="/emergency/burn-help" element={<BurnHelp />} />
           <Route path="/emergency/contacts" element={<EmergencyContacts />} />
           <Route path="/emergency/chatbot" element={<EmergencyChatbot />} />
-          <Route path="/emergency/voice-guidance" element={<VoiceGuidance />} />
-          <Route path="/emergency/voice-guidance" element={<VoiceGuidance />} />
-          
           {/* Health Check Features */}
           <Route path="/health/wound-watch" element={<WoundWatchHealth />} />
           <Route path="/health/burn-guide" element={<BurnGuide />} />
