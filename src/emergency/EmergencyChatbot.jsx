@@ -69,7 +69,7 @@ function EmergencyChatbot() {
       
       const botMsg = {
         type: 'bot',
-        text: '⚠️ Error connecting to AI service. Make sure the backend is running (node api-server.js). For immediate emergencies, call 911.',
+        text: 'ERROR: Cannot connect to AI service. Please ensure the backend server is running (node api-server.js). For immediate life-threatening emergencies, call 911.',
         timestamp: new Date()
       }
       setMessages(prev => [...prev, botMsg])
@@ -151,21 +151,6 @@ function EmergencyChatbot() {
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="quick-actions">
-          <p className="quick-actions-label">Quick Emergency Help:</p>
-          <div className="quick-actions-buttons">
-            {quickActions.map((action, index) => (
-              <button
-                key={index}
-                className="quick-action-btn"
-                onClick={() => handleQuickAction(action.query)}
-              >
-                {action.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
         <div className="input-container">
           <textarea
             ref={inputRef}
@@ -188,6 +173,21 @@ function EmergencyChatbot() {
               </>
             )}
           </button>
+        </div>
+
+        <div className="quick-actions">
+          <p className="quick-actions-label">Quick Emergency Help:</p>
+          <div className="quick-actions-buttons">
+            {quickActions.map((action, index) => (
+              <button
+                key={index}
+                className="quick-action-btn"
+                onClick={() => handleQuickAction(action.query)}
+              >
+                {action.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

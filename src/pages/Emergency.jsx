@@ -1,8 +1,7 @@
-import { Heart, FileText, MapPin, Activity, Phone, Bot } from 'lucide-react'
+import { Heart, FileText, MapPin, Activity, Phone, Bot, Scan } from 'lucide-react'
 import FeatureCard from '../components/FeatureCard'
 import SafetyBanner from '../components/SafetyBanner'
 import EmergencyCallButton from '../components/EmergencyCallButton'
-import EmergencyNotes from '../components/EmergencyNotes'
 import '../styles/cards.css'
 
 /**
@@ -11,6 +10,12 @@ import '../styles/cards.css'
  */
 function Emergency() {
   const emergencyFeatures = [
+    {
+      title: 'Vital Scan',
+      description: 'Quick vital signs assessment using camera and sensors',
+      icon: Scan,
+      route: '/emergency/vital-scan'
+    },
     {
       title: 'CPR Coach',
       description: 'Step-by-step CPR guidance with visual and audio cues',
@@ -62,10 +67,6 @@ function Emergency() {
 
       <div className="compact-section">
         <EmergencyCallButton emergencyNumber="7736502910" />
-      </div>
-
-      <div className="compact-section">
-        <EmergencyNotes sessionId="emergency_main" />
       </div>
 
       <div className="cards-grid">

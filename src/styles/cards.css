@@ -1,68 +1,72 @@
-/* Feature Cards Styles */
+/* Feature Cards Styles - Modern Medical Theme */
 .page-container {
-  max-width: 1200px;
+  max-width: var(--page-max-width);
   margin: 0 auto;
-  padding: 0.5rem;
+  padding: var(--space-md);
 }
 
 .page-header {
   text-align: center;
-  margin-bottom: 1rem;
-  padding: 1rem;
-  border-radius: var(--radius);
+  margin-bottom: var(--space-lg);
+  padding: var(--space-lg);
+  border-radius: var(--radius-lg);
 }
 
 .page-header.compact-header {
-  padding: 0.75rem;
-  margin-bottom: 0.75rem;
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
 }
 
 .emergency-header {
   background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border: 1px solid var(--emergency-red-light);
 }
 
 .health-header {
   background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border: 1px solid var(--health-green-light);
 }
 
 .page-title {
-  font-size: 1.75rem;
-  font-weight: 700;
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
   color: var(--text-primary);
-  margin-bottom: 0.25rem;
+  margin-bottom: var(--space-xs);
 }
 
 .page-subtitle {
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   color: var(--text-secondary);
+  font-weight: var(--font-weight-normal);
 }
 
 .compact-section {
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--space-md);
 }
 
 /* Cards Grid - Single Column */
 .cards-grid {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  margin-top: 1rem;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
 }
 
-/* Feature Card Component - Compact */
+/* Feature Card Component - Compact Professional Design */
 .feature-card {
   background-color: var(--bg-primary);
-  border-radius: var(--radius);
-  padding: 1rem;
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
   cursor: pointer;
-  transition: var(--transition);
-  box-shadow: var(--shadow-md);
-  border: 2px solid var(--border-color);
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
   position: relative;
   overflow: hidden;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-lg);
+  min-height: 80px;
 }
 
 .feature-card::before {
@@ -72,9 +76,9 @@
   left: 0;
   width: 4px;
   height: 100%;
-  background: linear-gradient(180deg, var(--primary-emergency) 0%, var(--primary-health) 100%);
+  background: var(--health-green);
   transform: scaleY(0);
-  transition: var(--transition);
+  transition: transform var(--transition-base);
 }
 
 .feature-card:hover::before {
@@ -82,16 +86,33 @@
 }
 
 .feature-card:hover {
-  transform: translateX(4px);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--primary-health);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--health-green);
+}
+
+.feature-card:active {
+  transform: translateY(0);
 }
 
 .card-icon {
-  font-size: 2rem;
   flex-shrink: 0;
-  width: 50px;
-  text-align: center;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--health-green);
+  transition: color var(--transition-base);
+}
+
+.card-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.feature-card:hover .card-icon {
+  color: var(--emergency-red);
 }
 
 .card-content {
@@ -100,29 +121,36 @@
 }
 
 .card-title {
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
-  margin-bottom: 0.25rem;
+  margin-bottom: var(--space-xs);
+  line-height: var(--line-height-tight);
 }
 
 .card-description {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
-  line-height: 1.4;
-  margin-bottom: 0;
+  line-height: var(--line-height-normal);
+  margin: 0;
 }
 
 .card-arrow {
-  font-size: 1.25rem;
-  color: var(--primary-health);
   flex-shrink: 0;
-  transition: var(--transition);
+  width: 24px;
+  height: 24px;
+  color: var(--text-tertiary);
+  transition: all var(--transition-base);
+}
+
+.card-arrow svg {
+  width: 20px;
+  height: 20px;
 }
 
 .feature-card:hover .card-arrow {
   transform: translateX(4px);
-  color: var(--primary-emergency);
+  color: var(--health-green);
 }
 
 /* Responsive Design */

@@ -1,101 +1,126 @@
+/* Trauma Eye - Responsive Medical Design */
+
 .trauma-track-container {
-  max-width: 900px;
+  max-width: var(--page-max-width);
   margin: 0 auto;
-  padding: 2rem;
+  padding: var(--space-lg);
+  width: 100%;
 }
 
 .trauma-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: var(--space-xl);
 }
 
 .trauma-header h1 {
-  font-size: 2rem;
-  font-weight: 700;
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
   color: var(--text-primary);
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-sm);
 }
 
 .trauma-header p {
-  font-size: 1.1rem;
+  font-size: var(--font-size-lg);
   color: var(--text-secondary);
+  font-weight: var(--font-weight-normal);
 }
 
-.capture-section, .analysis-section {
+.capture-section, 
+.analysis-section {
   background-color: var(--bg-primary);
-  border-radius: var(--radius);
-  padding: 2rem;
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
   box-shadow: var(--shadow-md);
-  margin-bottom: 2rem;
+  margin-bottom: var(--space-xl);
+  border: 1px solid var(--border-color);
 }
 
 .capture-section h2 {
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-lg);
 }
 
 .upload-area {
-  border: 2px dashed var(--border-color);
-  border-radius: var(--radius);
-  padding: 3rem 2rem;
+  border: 2px dashed var(--border-color-dark);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2xl) var(--space-xl);
   text-align: center;
-  margin-bottom: 1.5rem;
-  transition: all 0.3s ease;
+  margin-bottom: var(--space-lg);
+  transition: all var(--transition-base);
+  background-color: var(--bg-secondary);
 }
 
 .upload-area:hover {
-  border-color: var(--primary-emergency);
-  background-color: var(--bg-secondary);
+  border-color: var(--emergency-red);
+  background-color: var(--emergency-red-light);
 }
 
 .upload-area svg {
   color: var(--text-secondary);
-  margin: 0 auto 1rem;
+  margin: 0 auto var(--space-md);
+  width: 48px;
+  height: 48px;
 }
 
 .upload-area p {
-  font-size: 1.1rem;
+  font-size: var(--font-size-lg);
   color: var(--text-secondary);
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-lg);
+  font-weight: var(--font-weight-medium);
 }
 
 .button-group {
   display: flex;
-  gap: 1rem;
+  gap: var(--space-md);
   justify-content: center;
   flex-wrap: wrap;
+  width: 100%;
 }
 
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: 0 var(--space-xl);
+  height: var(--button-height);
   border: none;
-  border-radius: var(--radius);
-  font-size: 1rem;
-  font-weight: 500;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-base);
+  white-space: nowrap;
+  min-width: 120px;
 }
 
 .btn-primary {
-  background-color: var(--primary-emergency);
-  color: white;
+  background: linear-gradient(135deg, var(--emergency-red) 0%, var(--emergency-red-hover) 100%);
+  color: var(--text-inverse);
+  box-shadow: var(--shadow-sm);
 }
 
-.btn-primary:hover {
-  background-color: #b91c1c;
+.btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .btn-secondary {
   background-color: var(--bg-secondary);
   color: var(--text-primary);
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--border-color);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--bg-tertiary);
+  border-color: var(--border-color-dark);
 }
 
 .btn-secondary:hover {
@@ -409,29 +434,117 @@
   color: #7f1d1d;
 }
 
+/* Responsive Design - Mobile First */
 @media (max-width: 768px) {
   .trauma-track-container {
-    padding: 1rem;
+    padding: var(--space-md);
+  }
+
+  .trauma-header {
+    margin-bottom: var(--space-lg);
   }
 
   .trauma-header h1 {
-    font-size: 1.5rem;
+    font-size: var(--font-size-2xl);
   }
 
-  .capture-section, .analysis-section {
-    padding: 1.5rem;
+  .trauma-header p {
+    font-size: var(--font-size-base);
+  }
+
+  .capture-section, 
+  .analysis-section {
+    padding: var(--space-lg);
+    margin-bottom: var(--space-lg);
+  }
+
+  .capture-section h2 {
+    font-size: var(--font-size-xl);
   }
 
   .upload-area {
-    padding: 2rem 1rem;
+    padding: var(--space-xl) var(--space-md);
+  }
+
+  .upload-area svg {
+    width: 40px;
+    height: 40px;
+  }
+
+  .upload-area p {
+    font-size: var(--font-size-base);
   }
 
   .button-group {
     flex-direction: column;
+    width: 100%;
   }
 
   .btn {
     width: 100%;
-    justify-content: center;
+    min-width: auto;
   }
+
+  .image-preview img {
+    max-height: 300px;
+  }
+
+  .analysis-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+
+  .result-card {
+    padding: var(--space-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .trauma-track-container {
+    padding: var(--space-sm);
+  }
+
+  .trauma-header h1 {
+    font-size: var(--font-size-xl);
+  }
+
+  .capture-section, 
+  .analysis-section {
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+  }
+
+  .upload-area {
+    padding: var(--space-lg) var(--space-sm);
+  }
+
+  .btn {
+    height: var(--button-height-sm);
+    font-size: var(--font-size-sm);
+    padding: 0 var(--space-md);
+  }
+
+  .image-preview img {
+    max-height: 250px;
+    border-radius: var(--radius-md);
+  }
+}
+
+/* Ensure images are always responsive */
+.image-preview {
+  width: 100%;
+  overflow: hidden;
+}
+
+.image-preview img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* Prevent horizontal overflow */
+.trauma-track-container * {
+  max-width: 100%;
+  box-sizing: border-box;
 }
