@@ -1,150 +1,236 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { MapContainer, TileLayer, Marker, Popup, Circle } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 /*
-  Single-file enhanced AED Finder
-  - All UI, data and styles contained in this file (per request)
-  - Improved visual design, larger typography and responsive layout
-  - Keeps the original logic and sample data
+  AEDFinder — live-only resources, Leaflet map, no hardcoded/demo data
+  - Removed AED and police/fire functionality entirely
+  - Removed all demo / hardcoded resource lists
+  - Always fetches live data from Overpass after user grants geolocation
+  - If Overpass fails or returns no results, the UI shows a clear message
+  - Supported resource types:  HOSPITAL, PHARMACY, SAFE (community help points), DOCTOR (volunteer physicians)
+  - All UI and styles included in this single file
+  - Uses precise coordinates from OpenStreetMap Overpass API for accurate locations
 */
 
-/* ---------- sample resource data (unchanged) ---------- */
-const AED_LOCATIONS = [
-  { id: 1, type: "AED", name: "City Mall AED Station", lat: 9.613, lng: 76.522, notes: "Near main entrance" },
-  { id: 2, type: "AED", name: "Central Metro AED", lat: 9.615, lng: 76.528, notes: "Platform level" },
-  { id: 3, type: "AED", name: "Hospital Main Gate AED", lat: 9.618, lng: 76.525, notes: "Emergency gate" },
-  { id: 4, type: "AED", name: "Community Centre AED", lat: 9.620, lng: 76.521, notes: "Reception desk" },
-];
+/* fix leaflet default icons (required for many bundlers) */
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x. png",
+  iconUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+});
 
-const HOSPITALS = [
-  { id: 101, type: "HOSPITAL", name: "City Multispeciality Hospital (24×7 ER)", lat: 9.619, lng: 76.527, notes: "Emergency entrance at Gate 3" },
-  { id: 102, type: "HOSPITAL", name: "St. Mary’s Trauma Centre", lat: 9.624, lng: 76.520, notes: "Trauma & neurology priority" },
-  { id: 103, type: "HOSPITAL", name: "Govt. General Hospital", lat: 9.611, lng: 76.530, notes: "Public hospital, casualty ward" },
-];
-
-const PHARMACIES = [
-  { id: 201, type: "PHARMACY", name: "24×7 Emergency Pharmacy", lat: 9.616, lng: 76.523, notes: "Open all night, emergency meds" },
-  { id: 202, type: "PHARMACY", name: "City Medicals", lat: 9.617, lng: 76.529, notes: "Stock: epinephrine, inhalers, dressings" },
-];
-
-const POLICE_FIRE = [
-  { id: 301, type: "POLICE", name: "Central Police Station", lat: 9.614, lng: 76.519, notes: "For crime, assault, missing persons" },
-  { id: 302, type: "FIRE", name: "Fire & Rescue Station", lat: 9.622, lng: 76.533, notes: "Fire, building collapse, rescue" },
-];
-
-const SAFE_SPACES = [
-  { id: 401, type: "SAFE", name: "Women’s Help Desk – City Mall", lat: 9.6135, lng: 76.5225, notes: "Ask security for help immediately" },
-  { id: 402, type: "SAFE", name: "Community Help Centre", lat: 9.621, lng: 76.524, notes: "Staff trained in basic first aid" },
-];
-
-const VOLUNTEER_CLINICIANS = [
-  {
-    id: 501,
-    type: "CLINICIAN",
-    name: "Dr. Ananya Rao – Emergency Physician",
-    lat: 9.6182,
-    lng: 76.5261,
-    notes: "8 yrs tertiary ER, Available now (voice/chat support only)",
-  },
-  {
-    id: 502,
-    type: "CLINICIAN",
-    name: "Nurse Kiran Menon – Critical Care",
-    lat: 9.6171,
-    lng: 76.5238,
-    notes: "6 yrs ICU & trauma, Online – may respond",
-  },
-  {
-    id: 503,
-    type: "CLINICIAN",
-    name: "Dr. Arun Pillai – GP",
-    lat: 9.6129,
-    lng: 76.5294,
-    notes: "10 yrs family medicine, Offline (typical evenings)",
-  },
-];
-
-const RESOURCE_SETS = {
-  AED: AED_LOCATIONS,
-  HOSPITAL: HOSPITALS,
-  PHARMACY: PHARMACIES,
-  POLICE_FIRE: POLICE_FIRE,
-  SAFE: SAFE_SPACES,
-  CLINICIAN: VOLUNTEER_CLINICIANS,
-};
-
-/* ---------- utilities (unchanged) ---------- */
+/* ---------- utilities ---------- */
 function getLocationOnce() {
   return new Promise((resolve) => {
-    if (!navigator.geolocation) {
+    if (!navigator. geolocation) {
       resolve(null);
       return;
     }
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         resolve({
-          lat: pos.coords.latitude,
+          lat:  pos.coords.latitude,
           lng: pos.coords.longitude,
         });
       },
       () => resolve(null),
-      { enableHighAccuracy: true, timeout: 8000 }
+      { enableHighAccuracy: true, timeout: 10000 }
     );
   });
 }
 
-function distance2D(aLat, aLng, bLat, bLng) {
-  const dx = aLat - bLat;
-  const dy = aLng - bLng;
-  return Math.sqrt(dx * dx + dy * dy);
+function distanceMeters(aLat, aLng, bLat, bLng) {
+  if (aLat == null || aLng == null || bLat == null || bLng == null) return null;
+  const toRad = (v) => (v * Math.PI) / 180;
+  const R = 6371e3; // meters
+  const φ1 = toRad(aLat);
+  const φ2 = toRad(bLat);
+  const Δφ = toRad(bLat - aLat);
+  const Δλ = toRad(bLng - aLng);
+  const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+    Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return Math.round(R * c);
+}
+
+/* ---------- Overpass fetch helper (live-only) with precise coordinates ---------- */
+async function fetchPlaces(lat, lng, type) {
+  const radius = 3000;
+
+  const queries = {
+    HOSPITAL: `node["amenity"="hospital"](around: ${radius},${lat},${lng});way["amenity"="hospital"](around:${radius},${lat},${lng});relation["amenity"="hospital"](around:${radius},${lat},${lng});`,
+    PHARMACY: `node["amenity"="pharmacy"](around:${radius},${lat},${lng});way["amenity"="pharmacy"](around:${radius},${lat},${lng});relation["amenity"="pharmacy"](around:${radius},${lat},${lng});`,
+    SAFE: `
+      node["amenity"="community_centre"](around:${radius},${lat},${lng});
+      way["amenity"="community_centre"](around:${radius},${lat},${lng});
+      relation["amenity"="community_centre"](around:${radius},${lat},${lng});
+      node["social_facility"](around:${radius},${lat},${lng});
+      way["social_facility"](around:${radius},${lat},${lng});
+      relation["social_facility"](around:${radius},${lat},${lng});
+    `,
+    DOCTOR: `
+      node["amenity"="clinic"](around:${radius},${lat},${lng});
+      way["amenity"="clinic"](around:${radius},${lat},${lng});
+      relation["amenity"="clinic"](around:${radius},${lat},${lng});
+      node["amenity"="doctors"](around:${radius},${lat},${lng});
+      way["amenity"="doctors"](around:${radius},${lat},${lng});
+      relation["amenity"="doctors"](around:${radius},${lat},${lng});
+    `,
+  };
+
+  const query = `
+    [out:json][timeout:25];
+    (${queries[type] || ""});
+    out center;
+  `;
+
+  const res = await fetch("https://overpass-api.de/api/interpreter", {
+    method: "POST",
+    body: query,
+  });
+
+  if (!res.ok) {
+    const txt = await res.text().catch(() => "");
+    throw new Error(`Overpass request failed (${res.status}) ${txt}`);
+  }
+  const data = await res.json();
+
+  return (data.elements || []).map((e) => {
+    // Use precise node coordinates if available, otherwise use center of way/relation
+    const preciseLat = e.lat ??  e.center?. lat ??  null;
+    const preciseLng = e.lon ?? e.center?.lon ?? null;
+    return {
+      id: `${e.type}/${e.id}`,
+      name: e.tags?.name || e.tags?.operator || "Unnamed",
+      lat: preciseLat,
+      lng: preciseLng,
+      notes: Object.entries(e.tags || {})
+        .slice(0, 3)
+        .map(([k, v]) => `${k}: ${v}`)
+        .join(", "),
+      tags: e.tags || {},
+    };
+  }).filter((i) => i.lat != null && i.lng != null);
 }
 
 /* ---------- component ---------- */
-function AEDFinder() {
-  const [location, setLocation] = useState(null);
-  const [activeType, setActiveType] = useState("AED");
-  const [sortedItems, setSortedItems] = useState(RESOURCE_SETS["AED"]);
+export default function AEDFinder() {
+  const [location, setLocation] = useState(null); // {lat,lng}
+  const [activeType, setActiveType] = useState("HOSPITAL"); // default to hospitals
+  const [items, setItems] = useState([]); // live items only (now limited to top 3)
   const [loading, setLoading] = useState(false);
   const [locationError, setLocationError] = useState("");
+  const [dataError, setDataError] = useState("");
+  const mapRef = useRef(null);
 
-  const fetchLocation = async () => {
-    setLoading(true);
+  // fetch location + live places
+  const fetchLocationAndPlaces = async (type = activeType) => {
     setLocationError("");
-    const loc = await getLocationOnce();
-    setLocation(loc);
-    setLoading(false);
-    if (!loc) {
-      setLocationError(
-        "Location unavailable. Check GPS/browser permissions or select a resource manually."
-      );
+    setDataError("");
+    setLoading(true);
+    try {
+      const loc = await getLocationOnce();
+      if (!loc) {
+        setLocationError("Location unavailable or permission denied.");
+        setItems([]);
+        setLocation(null);
+        setLoading(false);
+        return;
+      }
+      setLocation(loc);
+
+      // fetch places for provided type
+      try {
+        const live = await fetchPlaces(loc. lat, loc.lng, type);
+        if (! live || live.length === 0) {
+          setItems([]);
+          setDataError("No live results found nearby.  Try widening your search area or enabling location in a different spot.");
+        } else {
+          // compute distance and sort, then keep only top 3
+          const unified = live.map((it) => ({
+            ...it,
+            distance: distanceMeters(loc.lat, loc.lng, it.lat, it.lng),
+          })).sort((a, b) => (a.distance || 0) - (b.distance || 0)).slice(0, 3);
+          setItems(unified);
+        }
+      } catch (e) {
+        console.warn("Overpass error:", e);
+        setItems([]);
+        setDataError("Failed to fetch live resources. Please try again later.");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
+  // When activeType changes, if we already have a location fetch new places
   useEffect(() => {
-    const baseList = RESOURCE_SETS[activeType] || [];
-    if (!location) {
-      setSortedItems(baseList);
-      return;
-    }
-    const sorted = [...baseList].sort((a, b) => {
-      const da = distance2D(location.lat, location.lng, a.lat, a.lng);
-      const db = distance2D(location.lat, location.lng, b.lat, b.lng);
-      return da - db;
-    });
-    setSortedItems(sorted);
-  }, [location, activeType]);
+    if (! location) return;
+    (async () => {
+      setLoading(true);
+      setDataError("");
+      try {
+        const live = await fetchPlaces(location.lat, location.lng, activeType);
+        if (!live || live.length === 0) {
+          setItems([]);
+          setDataError("No live results found for selected resource nearby.");
+        } else {
+          const unified = live.map((it) => ({
+            ...it,
+            distance: distanceMeters(location.lat, location.lng, it.lat, it.lng),
+          })).sort((a, b) => (a.distance || 0) - (b.distance || 0)).slice(0, 3);
+          setItems(unified);
+        }
+      } catch (e) {
+        console.warn("Overpass error:", e);
+        setItems([]);
+        setDataError("Failed to fetch live resources. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [activeType]);
 
-  /* ---------- inline style objects (kept for convenience) ---------- */
+  // open in maps:  center Leaflet map to the selected coords (if map exists), otherwise open external
+  const openInMaps = (lat, lng) => {
+    if (mapRef.current) {
+      try {
+        // center map to the exact precise coordinates and open a popup there
+        mapRef.current.setView([lat, lng], 18, { animate: true });
+
+        // create and open a temporary popup at the exact precise coordinates so user sees the spot
+        const popup = L.popup({ autoClose: true, closeOnClick: true })
+          .setLatLng([lat, lng])
+          .setContent(`<div style='font-weight: 800'>Selected location</div><div style='font-size: 12px;color:#666'>${lat. toFixed(6)}, ${lng.toFixed(6)}</div>`);
+        popup.openOn(mapRef.current);
+      } catch (e) {
+        // fallback to external if something goes wrong
+        window.open(`https://www.google.com/maps/search/? api=1&query=${lat},${lng}`, "_blank");
+      }
+    } else {
+      window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, "_blank");
+    }
+  };
+
+  /* ---------- styles (kept from previous design) ---------- */
   const outer = {
     width: "100vw",
     minHeight: "100vh",
     margin: 0,
-    padding: "1.25rem",
+    padding: "1. 25rem",
     boxSizing: "border-box",
     display: "flex",
     justifyContent: "center",
     alignItems: "flex-start",
+    background: "#fff",
   };
 
   const inner = {
@@ -152,12 +238,11 @@ function AEDFinder() {
     maxWidth: "1320px",
     display: "flex",
     flexDirection: "column",
-    gap: "1.5rem",
+    gap:  "1rem",
   };
 
   const pageHeader = { marginBottom: "0.25rem" };
 
-  // kept small inline values where appropriate; most sizing is done in CSS below
   const headerBar = {
     display: "flex",
     justifyContent: "space-between",
@@ -168,8 +253,14 @@ function AEDFinder() {
 
   const locateButton = {
     display: "inline-flex",
-    alignItems: "center",
+    alignItems:  "center",
     gap: 8,
+    padding: "8px 12px",
+    borderRadius: 999,
+    border: "1px solid #fecaca",
+    background: "linear-gradient(135deg,#fff,#fee2e2)",
+    fontWeight: 800,
+    cursor: "pointer",
   };
 
   const mapButton = {
@@ -179,485 +270,132 @@ function AEDFinder() {
     cursor: "pointer",
     fontWeight: 700,
     color: "#fff",
+    background: "linear-gradient(135deg,#dc2626,#b91c1c)",
   };
 
-  /* ---------- computed labels/icons (unchanged) ---------- */
-  const resourceLabel =
-    activeType === "AED"
-      ? "defibrillator"
-      : activeType === "HOSPITAL"
-      ? "emergency hospital"
-      : activeType === "PHARMACY"
-      ? "emergency pharmacy"
-      : activeType === "POLICE_FIRE"
-      ? "police / fire station"
-      : activeType === "SAFE"
-      ? "safe help point"
-      : "certified volunteer clinician";
-
-  const activeIcon =
-    activeType === "AED"
-      ? "⚡"
-      : activeType === "HOSPITAL"
-      ? "🏥"
-      : activeType === "PHARMACY"
-      ? "💊"
-      : activeType === "POLICE_FIRE"
-      ? "🚓"
-      : activeType === "SAFE"
-      ? "🛟"
-      : "👩‍⚕️";
-
-  /* ---------- CSS injected into the page (single-file approach) ---------- */
   const css = `
-    :root {
-      --accent: #b91c1c;
-      --accent-700: #dc2626;
-      --muted: #6b7280;
-      --card-bg: #fff;
-      --soft: #fee2e2;
-      --glass-border: rgba(252,165,165,0.32);
-      --radius-lg: 18px;
-      --radius-md: 12px;
-    }
-
-    /* global reset for this component */
-    .aed-root { font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; color: #111827; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
-
-    /* header */
-    .aed-title {
-      display:flex;
-      align-items:center;
-      gap:0.6rem;
-      color:var(--accent);
-      font-weight:900;
-      margin:0;
-      line-height:1;
-      font-size: clamp(1.6rem, 5.6vw, 3.0rem); /* larger & responsive */
-      text-shadow: 0 1px 0 rgba(255,255,255,0.6);
-      letter-spacing: -0.02em;
-    }
-
-    .aed-subtitle {
-      margin: 0.45rem 0 0;
-      color: var(--muted);
-      font-size: clamp(0.95rem, 2.2vw, 1.05rem);
-      max-width: 880px;
-      line-height: 1.35;
-      opacity: 0.95;
-    }
-
-    .aed-card {
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--glass-border);
-      background: linear-gradient(180deg, #fff, #fff7f7);
-      padding: 18px;
-      display:flex;
-      flex-direction:column;
-      gap:14px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.06);
-    }
-
-    .aed-pill {
-      font-size: 12px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, var(--soft), #fecaca);
-      border: 1px solid #f97373;
-      color: var(--accent);
-      font-weight:800;
-      letter-spacing: 0.6px;
-      display:inline-block;
-    }
-
-    /* locate button */
-    .aed-locate {
-      background: linear-gradient(135deg,#fff,#fee2e2);
-      border:1px solid #fecaca;
-      padding:8px 12px;
-      border-radius:999px;
-      font-weight:800;
-      color:var(--accent-700);
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      transition: transform .12s ease, box-shadow .12s ease;
-      font-size: 0.98rem;
-    }
-    .aed-locate:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(220,38,38,0.12); }
-    .aed-locate:disabled { opacity: 0.7; transform:none; box-shadow:none; cursor:default; }
-
-    /* tabs */
-    .aed-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
-    .aed-tab {
-      padding:10px 14px;
-      border-radius:999px;
-      border:1px solid #fecaca;
-      background: #fff;
-      color:var(--accent-700);
-      font-weight:700;
-      cursor:pointer;
-      font-size: 0.98rem;
-      transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
-    }
-    .aed-tab.active {
-      background: linear-gradient(135deg,#fee2e2,#fecaca);
-      border-color: #ef4444;
-      box-shadow: 0 8px 20px rgba(239,68,68,0.10);
-    }
-    .aed-tab:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.06); }
-
-    /* layout */
-    .aed-layout {
-      display: grid;
-      grid-template-columns: 1.45fr 1fr;
-      gap: 16px;
-      align-items: start;
-    }
-
-    .aed-mapbox {
-      border-radius: var(--radius-md);
-      border:1px solid #fecaca;
-      padding:12px;
-      background: linear-gradient(135deg,#fff8f8,#fff);
-      min-height: 320px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-
-    .aed-minimap {
-      border-radius: 12px;
-      border:1px solid #fca5a5;
-      height: clamp(220px, 28vw, 420px); /* bigger on wide screens */
-      position:relative;
-      overflow:hidden;
-      background: radial-gradient(circle at 10% 10%, #fff8f7, #fff);
-      box-shadow: 0 12px 30px rgba(185,28,28,0.06);
-    }
-
-    .aed-map-grid {
-      position:absolute; inset:0;
-      background-image: linear-gradient(#fecaca 1px, transparent 1px), linear-gradient(90deg, #fecaca 1px, transparent 1px);
-      background-size: 28px 28px;
-      opacity:0.28;
-      pointer-events:none;
-    }
-
-    .aed-rad {
-      position:absolute; inset:-40%;
-      background: radial-gradient(circle at 50% 50%, rgba(248,113,113,0.22), transparent 55%);
-      opacity: 0;
-      transition: opacity .28s ease;
-      pointer-events:none;
-    }
-    .aed-rad.active { opacity:1; }
-
-    .aed-you {
-      position:absolute;
-      left:50%;
-      top:58%;
-      transform:translate(-50%,-50%);
-      width:16px; height:16px;
-      border-radius:999px;
-      background: var(--accent-700);
-      border: 3px solid #fff5f5;
-      box-shadow: 0 0 0 8px rgba(220,38,38,0.12);
-      z-index:3;
-      animation: you-pulse 1800ms infinite;
-    }
-
-    @keyframes you-pulse {
-      0% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 0 6px rgba(220,38,38,0.14); }
-      60% { transform: translate(-50%, -50%) scale(1.08); box-shadow: 0 0 0 22px rgba(220,38,38,0.06); }
-      100% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 0 6px rgba(220,38,38,0.14); }
-    }
-
-    .aed-you-label {
-      position:absolute;
-      top:58%;
-      left:50%;
-      transform: translate(-50%,-150%);
-      font-size: 0.85rem;
-      background:#fff6f6;
-      border:1px solid #fecaca;
-      color:var(--accent);
-      padding:6px 8px;
-      border-radius:999px;
-      z-index:3;
-      font-weight:700;
-    }
-
-    .aed-marker {
-      position:absolute;
-      border-radius:999px;
-      padding:8px 10px;
-      font-size:0.95rem;
-      display:flex;
-      align-items:center;
-      gap:8px;
-      cursor:pointer;
-      transition: transform .12s ease, box-shadow .12s ease;
-      white-space:nowrap;
-      z-index:2;
-    }
-    .aed-marker.primary { background: linear-gradient(135deg,#b91c1c,#ef4444); color: #fff; box-shadow: 0 10px 30px rgba(239,68,68,0.22); }
-    .aed-marker.secondary { background:#fff; border:1px solid #fecaca; color:var(--accent); box-shadow: 0 8px 24px rgba(185,28,28,0.06); }
-    .aed-marker:hover { transform: translateY(-4px); }
-
-    /* list column */
-    .aed-listbox {
-      border-radius: var(--radius-md);
-      border:1px solid #fecaca;
-      padding: 12px;
-      min-height: 240px;
-      background: linear-gradient(180deg,#fff,#fff7f7);
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-
-    .aed-list-header { display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:1.02rem; font-weight:800; color:#111827; }
-    .aed-list-sub { font-size:0.92rem; color:var(--muted); font-weight:600; }
-    .aed-list-scroller { max-height: 360px; overflow-y:auto; padding-right:6px; display:flex; flex-direction:column; gap:10px; }
-
-    .aed-item {
-      border-radius:10px;
-      padding:12px;
-      background:#fff;
-      border:1px solid #e5e7eb;
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      align-items:flex-start;
-      transition: box-shadow .12s ease, transform .12s ease;
-    }
-    .aed-item.primary { background: #fff1f1; border-color:#f97373; box-shadow: 0 12px 24px rgba(239,68,68,0.06); }
-    .aed-item:hover { transform: translateY(-4px); box-shadow: 0 18px 40px rgba(0,0,0,0.06); }
-
-    .item-left { display:flex; flex-direction:column; gap:6px; }
-    .item-title { font-size: clamp(1.03rem, 2.6vw, 1.18rem); font-weight:800; color:#111827; }
-    .item-coords { color: var(--muted); font-size: 0.95rem; }
-    .item-notes { color: var(--accent); font-weight:700; }
-
-    .item-actions { display:flex; align-items:center; gap:8px; }
-
-    .btn-map {
-      background: linear-gradient(135deg,#dc2626,#b91c1c);
-      color:#fff;
-      padding:10px 14px;
-      border-radius:999px;
-      font-weight:800;
-      border:none;
-      cursor:pointer;
-      transition: transform .12s ease, box-shadow .12s ease;
-      box-shadow: 0 10px 26px rgba(185,28,28,0.14);
-      font-size:0.95rem;
-    }
-    .btn-map:hover { transform: translateY(-4px); box-shadow: 0 16px 34px rgba(185,28,28,0.2); }
-
-    /* small helpful note */
-    .aed-note { font-size:0.92rem; color:var(--muted); text-align:right; }
-
-    /* responsiveness */
-    @media (max-width: 980px) {
-      .aed-layout { grid-template-columns: 1fr; }
-      .aed-mapbox { order: 1; }
-      .aed-listbox { order: 2; }
-      .aed-subtitle { font-size: 0.98rem; }
-    }
+    .title { font-weight: 900; color:#b91c1c; font-size:  clamp(1.6rem,4. 5vw,2.4rem); margin:  0; display: flex; align-items: center; gap:. 5rem; }
+    .subtitle { margin-top:6px; color:#6b7280; font-size:  1rem; max-width:880px; }
+    .card { border-radius: 16px; padding:16px; background:  linear-gradient(180deg,#fff,#fff7f7); box-shadow:0 10px 30px rgba(0,0,0,0.05); border: 1px solid rgba(252,165,165,0.2); }
+    .tabs { display:flex; gap:8px; margin-top:10px; flex-wrap:  wrap; }
+    .tab { padding:8px 12px; border-radius:999px; border:1px solid #fecaca; background:#fff; cursor:pointer; font-weight:700; }
+    .tab.active { background:  linear-gradient(135deg,#fee2e2,#fecaca); border-color:#ef4444; }
+    .layout { display:grid; grid-template-columns:  1.45fr 1fr; gap:16px; margin-top:12px; }
+    .mapbox { border-radius:12px; overflow:hidden; min-height:320px; position:relative; border:1px solid #fca5a5; background:#fff; }
+    .listbox { border-radius:12px; padding:12px; border:1px solid #fecaca; background:  linear-gradient(180deg,#fff,#fff7f7); min-height:320px; overflow-y:auto; }
+    .list-item { display:flex; justify-content:space-between; gap:12px; padding:12px; border-radius:10px; background:#fff; border:1px solid #e5e7eb; margin-bottom:10px; }
+    .item-title { font-weight:800; }
+    .muted { color:#6b7280; }
+    @media (max-width:980px) { .layout { grid-template-columns: 1fr; } }
   `;
 
-  /* ---------- render ---------- */
   return (
-    <div style={outer} className="aed-root">
-      {/* injected styles for this component only (single-file) */}
+    <div style={outer}>
       <style dangerouslySetInnerHTML={{ __html: css }} />
-
       <div style={inner}>
         <div style={pageHeader}>
-          <h1 className="aed-title">🚑 SilentSOS & AED Finder</h1>
-          <p className="aed-subtitle">
-            Quickly locate nearest AEDs, emergency hospitals, pharmacies, police/fire, safe help points, and certified volunteer clinicians offering calm guidance while you travel to care.
+          <h1 className="title">Live Resource Finder</h1>
+          <p className="subtitle">
+            Locate live emergency hospitals, pharmacies, physicians and community help points from OpenStreetMap.  Precise coordinates from real-time Overpass data.
           </p>
         </div>
 
-        <div style={{ display: "flex", gap: 12 }}>
-          <div style={{ flex: 1 }}>
-            <div className="aed-card">
-              <div style={headerBar}>
-                <div>
-                  <div className="aed-pill">SilentSOS</div>
-                  <div style={{ fontSize: 15, marginTop: 6, color: "#4b5563", fontWeight: 700 }}>
-                    One tap to nearest critical help.
-                  </div>
-                </div>
+        <div className="card">
+          <div style={headerBar}>
+            <div>
+              <div style={{ fontWeight: 900, color: "#064e3b" }}>Live search</div>
+              <div style={{ marginTop: 6, color: "#475569" }}>Tap to allow location and fetch nearby live resources from OpenStreetMap with precise coordinates. </div>
+            </div>
 
-                <button
-                  onClick={fetchLocation}
-                  style={{ ...locateButton }}
-                  className="aed-locate"
-                  disabled={loading}
-                >
-                  <span
-                    style={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: 999,
-                      background: location ? "#16a34a" : "#f97316",
-                      boxShadow: location
-                        ? "0 0 0 6px rgba(74,222,128,0.25)"
-                        : "0 0 0 6px rgba(248,171,88,0.25)",
-                    }}
-                  />
-                  {loading ? "Locating…" : location ? "Refresh location" : "Use my location"}
-                </button>
-              </div>
+            <div>
+              <button
+                onClick={() => fetchLocationAndPlaces()}
+                disabled={loading}
+                style={locateButton}
+                aria-label="Use my location"
+              >
+                <span style={{ width: 10, height: 10, borderRadius: 999, background: location ?  "#16a34a" : "#f97316" }} />
+                {loading ? "Working…" : location ? "Refresh location" : "Use my location"}
+              </button>
+            </div>
+          </div>
 
-              <div className="aed-tabs" style={{ marginTop: 6 }}>
-                <button
-                  className={"aed-tab " + (activeType === "AED" ? "active" : "")}
-                  onClick={() => setActiveType("AED")}
-                  title="Find AEDs"
-                >
-                  ⚡ AED
-                </button>
-                <button
-                  className={"aed-tab " + (activeType === "HOSPITAL" ? "active" : "")}
-                  onClick={() => setActiveType("HOSPITAL")}
-                >
-                  🏥 ER Hospitals
-                </button>
-                <button
-                  className={"aed-tab " + (activeType === "PHARMACY" ? "active" : "")}
-                  onClick={() => setActiveType("PHARMACY")}
-                >
-                  💊 24×7 Pharmacy
-                </button>
-                <button
-                  className={"aed-tab " + (activeType === "POLICE_FIRE" ? "active" : "")}
-                  onClick={() => setActiveType("POLICE_FIRE")}
-                >
-                  🚓 Police / Fire
-                </button>
-                <button
-                  className={"aed-tab " + (activeType === "SAFE" ? "active" : "")}
-                  onClick={() => setActiveType("SAFE")}
-                >
-                  🛟 Safe Help
-                </button>
-                <button
-                  className={"aed-tab " + (activeType === "CLINICIAN" ? "active" : "")}
-                  onClick={() => setActiveType("CLINICIAN")}
-                >
-                  👩‍⚕️ Clinicians
-                </button>
-              </div>
+          <div className="tabs">
+            <button className={`tab ${activeType === "HOSPITAL" ?  "active" : ""}`} onClick={() => setActiveType("HOSPITAL")}>🏥 Hospitals</button>
+            <button className={`tab ${activeType === "PHARMACY" ? "active" : ""}`} onClick={() => setActiveType("PHARMACY")}>💊 Pharmacies</button>
+            <button className={`tab ${activeType === "DOCTOR" ? "active" : ""}`} onClick={() => setActiveType("DOCTOR")}>👨‍⚕️ Physicians</button>
+            <button className={`tab ${activeType === "SAFE" ? "active" :  ""}`} onClick={() => setActiveType("SAFE")}>🛟 Community Help</button>
+          </div>
 
-              <div className="aed-layout" style={{ marginTop: 8 }}>
-                <div className="aed-mapbox">
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, color: "#6b7280" }}>
-                    <span style={{ fontWeight: 800 }}>Map overview</span>
-                    <span style={{ fontWeight: 700, color: "#374151" }}>
-                      {location ? "Location active" : 'Approximate (tap "Use my location")'}
-                    </span>
-                  </div>
-
-                  <div className="aed-minimap" role="img" aria-label="Map overview with nearby resources">
-                    <div className="aed-map-grid" />
-                    <div className={"aed-rad " + (location ? "active" : "")} />
-                    <div className="aed-you" />
-                    <div className="aed-you-label">You</div>
-
-                    {sortedItems[0] && (
-                      <div
-                        className="aed-marker primary"
-                        style={{ left: "63%", top: "42%" }}
-                        title={`Closest ${resourceLabel}`}
-                        onClick={() => {
-                          const r = sortedItems[0];
-                          window.open(`https://www.google.com/maps?q=${r.lat},${r.lng}`, "_blank");
-                        }}
-                      >
-                        <span style={{ fontSize: 18 }}>{activeIcon}</span>
-                        <span style={{ fontWeight: 900 }}>Nearest {resourceLabel}</span>
-                      </div>
-                    )}
-
-                    <div className="aed-marker secondary" style={{ left: "32%", top: "30%" }}>
-                      <span style={{ fontSize: 16 }}>{activeIcon}</span>
-                      <span style={{ fontWeight: 700 }}>Nearby</span>
-                    </div>
-                    <div className="aed-marker secondary" style={{ left: "72%", top: "72%" }}>
-                      <span style={{ fontSize: 16 }}>{activeIcon}</span>
-                      <span style={{ fontWeight: 700 }}>Nearby</span>
-                    </div>
-                  </div>
-
-                  {locationError && (
-                    <div style={{ marginTop: 8, fontSize: 14, color: "#b91c1c", background: "#fff2f2", borderRadius: 10, padding: 10, border: "1px solid #fecaca" }}>
-                      {locationError}
-                    </div>
-                  )}
-                </div>
-
-                <div className="aed-listbox" aria-live="polite">
-                  <div className="aed-list-header">
-                    <div>
-                      <div style={{ fontSize: 18, fontWeight: 900 }}>Nearest {resourceLabel}{sortedItems.length > 1 ? "s" : ""}</div>
-                      <div className="aed-list-sub" style={{ marginTop: 6 }}>
-                        {activeType === "CLINICIAN" ? "Tap to see connection options" : 'Tap "Open in Maps" to navigate'}
-                      </div>
-                    </div>
-                    <div style={{ color: "#6b7280", fontSize: 13, fontWeight: 700 }}>
-                      {location ? <span>Sorted by distance</span> : <span>Unsorted — enable location</span>}
-                    </div>
-                  </div>
-
-                  <div className="aed-list-scroller">
-                    {sortedItems.length === 0 && <div style={{ color: "#6b7280" }}>No entries available.</div>}
-
-                    {sortedItems.map((item, idx) => (
-                      <div key={item.id} className={"aed-item " + (idx === 0 ? "primary" : "")}>
-                        <div className="item-left">
-                          <div className="item-title">{item.name}</div>
-                          <div className="item-coords">{item.lat.toFixed(4)}, {item.lng.toFixed(4)}</div>
-                          {item.notes && <div className="item-notes">{item.notes}</div>}
+          <div className="layout" style={{ marginTop: 12 }}>
+            <div className="mapbox" aria-live="polite" aria-label="Map and search results" style={{ minHeight: 320 }}>
+              {location ?  (
+                <MapContainer whenCreated={(m) => { mapRef.current = m; }} center={[location.lat, location.lng]} zoom={14} style={{ height: "100%", width: "100%" }} scrollWheelZoom={false}>
+                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="© OpenStreetMap contributors" />
+                  <Marker position={[location.lat, location. lng]}>
+                    <Popup>Your location</Popup>
+                  </Marker>
+                  <Circle center={[location.lat, location.lng]} radius={2000} pathOptions={{ color: "#fca5a5", weight: 1, dashArray: "6" }} />
+                  {items.map((it) => (
+                    <Marker key={it.id} position={[it.lat, it. lng]}>
+                      <Popup>
+                        <div style={{ fontWeight: 800 }}>{it.name}</div>
+                        <div style={{ marginTop: 4, fontSize: "12px", color: "#666" }}>
+                          {it.lat. toFixed(6)}, {it.lng.toFixed(6)}
                         </div>
-
-                        <div className="item-actions">
-                          {activeType === "CLINICIAN" ? (
-                            <button
-                              style={{ ...mapButton, background: "linear-gradient(135deg,#1d4ed8,#2563eb)" }}
-                              onClick={() =>
-                                alert(
-                                  `In a production build, this would open a secure voice/video/chat session with ${item.name} via the volunteer clinician network.`
-                                )
-                              }
-                              className="btn-map"
-                            >
-                              View contact options
-                            </button>
-                          ) : (
-                            <button
-                              style={mapButton}
-                              onClick={() =>
-                                window.open(`https://www.google.com/maps?q=${item.lat},${item.lng}`, "_blank")
-                              }
-                              className="btn-map"
-                            >
-                              Open in Maps
-                            </button>
-                          )}
+                        {it.notes && <div style={{ marginTop: 6 }}>{it.notes}</div>}
+                        <div style={{ marginTop: 6 }}>
+                          <button onClick={() => openInMaps(it.lat, it.lng)} style={{ padding: "6px 10px", borderRadius: 8, background: "#06b6d4", color: "#fff", border: "none" }}>Show on map</button>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      </Popup>
+                    </Marker>
+                  ))}
+                </MapContainer>
+              ) : (
+                <div style={{ padding: 18, color: "#6b7280" }}>
+                  Location not set.  Tap "Use my location" to allow the browser to share your location and fetch live resources from OpenStreetMap.
                 </div>
+              )}
+            </div>
+
+            <div className="listbox">
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
+                <div style={{ fontWeight: 900 }}>
+                  {activeType === "HOSPITAL" ?  "Nearby Hospitals" : activeType === "PHARMACY" ? "Nearby Pharmacies" : activeType === "DOCTOR" ? "Nearby Physicians" : "Community Help Points"}
+                </div>
+                <div className="muted" style={{ fontWeight: 700 }}>{location ? "Live results (top 3)" : "Waiting for location"}</div>
               </div>
 
-              <div className="aed-note" style={{ marginTop: 8 }}>
-                Locations and clinician entries are sample data for demo. In production, AEDs, facilities, and licenses/availability would be verified with local authorities and medical councils before use.
+              {locationError && <div style={{ color: "crimson", marginBottom: 10 }}>{locationError}</div>}
+              {dataError && <div style={{ color: "crimson", marginBottom: 10 }}>{dataError}</div>}
+
+              {items.length === 0 && ! dataError && ! location && (
+                <div className="muted">No results yet. Allow location and fetch live resources.</div>
+              )}
+
+              {items.length === 0 && !! dataError && (
+                <div className="muted">{dataError}</div>
+              )}
+
+              {items.map((it, idx) => (
+                <div key={it. id} className="list-item" style={idx === 0 ? { borderColor: "#f97373", background: "#fff1f1" } : undefined}>
+                  <div>
+                    <div className="item-title">{it. name}</div>
+                    <div className="muted" style={{ marginTop: 6, fontSize: "13px", fontFamily: "monospace" }}>
+                      {it.lat.toFixed(8)}, {it.lng.toFixed(8)}
+                    </div>
+                    {it.notes && <div style={{ marginTop: 6, color: "#b91c1c", fontWeight: 700, fontSize: "13px" }}>{it.notes}</div>}
+                    {it.distance != null && <div style={{ marginTop: 6 }} className="muted">{it.distance} m away</div>}
+                  </div>
+
+                  <div style={{ display:  "flex", flexDirection: "column", gap: 8 }}>
+                    <button className="btn-map" style={mapButton} onClick={() => openInMaps(it.lat, it.lng)}>Open in Maps</button>
+                  </div>
+                </div>
+              ))}
+
+              <div style={{ marginTop: 10, color: "#6b7280", fontSize: 13 }}>
+                Results are live from OpenStreetMap via Overpass with precise GPS coordinates. If you see no results, try moving to a different location or increase the radius in code, or try again later.
               </div>
             </div>
           </div>
@@ -666,5 +404,3 @@ function AEDFinder() {
     </div>
   );
 }
-
-export default AEDFinder;

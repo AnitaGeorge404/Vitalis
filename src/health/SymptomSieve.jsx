@@ -94,6 +94,47 @@ const CARE_SUGGESTIONS = {
   ],
 };
 
+// --- Helper Functions ---
+const parseAIResponse = (text) => {
+  const sections = {
+    urgency: "",
+    assessment: "",
+    actions: "",
+    warning: "",
+  };
+
+  if (!text) return sections;
+
+  const urgencyMatch = text.match(
+    /\*\*URGENCY LEVEL:\*\*([\s\S]*?)(?=\*\*|$)/i
+  );
+  const assessmentMatch = text.match(
+    /\*\*ASSESSMENT:\*\*([\s\S]*?)(?=\*\*|$)/i
+  );
+  const actionsMatch = text.match(
+    /\*\*RECOMMENDED ACTIONS:\*\*([\s\S]*?)(?=\*\*|$)/i
+  );
+  const warningMatch = text.match(
+    /\*\*WHEN TO SEEK IMMEDIATE HELP:\*\*([\s\S]*?)(?=\*\*|$)/i
+  );
+
+  sections.urgency = urgencyMatch ? urgencyMatch[1].trim() : "";
+  sections.assessment = assessmentMatch ? assessmentMatch[1].trim() : "";
+  sections.actions = actionsMatch ? actionsMatch[1].trim() : "";
+  sections.warning = warningMatch ? warningMatch[1].trim() : "";
+
+  return sections;
+};
+
+const getUrgencyColor = (urgencyText) => {
+  const text = urgencyText.toLowerCase();
+  if (text.includes("urgent") && !text.includes("moderate"))
+    return { bg: "#fee2e2", border: "#dc2626", text: "#991b1b" };
+  if (text.includes("moderate"))
+    return { bg: "#fef3c7", border: "#d97706", text: "#92400e" };
+  return { bg: "#dcfce7", border: "#059669", text: "#065f46" };
+};
+
 const STYLES = {
   container: {
     minHeight: "100vh",
@@ -264,10 +305,106 @@ export default function SymptomSieve() {
   const [durations, setDurations] = useState({});
   const [showNotListed, setShowNotListed] = useState(false);
   const [result, setResult] = useState(null);
+  const [customSymptom, setCustomSymptom] = useState("");
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [aiResponse, setAiResponse] = useState(null);
 
   const selectedSymptoms = SYMPTOMS.filter((s) => selectedIds.includes(s.id));
   const hasCritical = selectedSymptoms.some((s) => s.critical);
   const isAgeValid = age !== "" && parseInt(age) >= 0 && parseInt(age) <= 150;
+
+  const analyzeCustomSymptom = async () => {
+    setIsAnalyzing(true);
+    setAiResponse(null);
+
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyDTPj6MhaDkjQci4NCPECV0roe22atqAZE`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    text: `You are an experienced medical triage nurse assistant. Analyze this patient case:
+
+PATIENT INFORMATION:
+- Age: ${age} years old
+- Chief Complaint: "${customSymptom}"
+
+TASK:
+Provide a structured triage assessment with the following sections:
+
+**URGENCY LEVEL:**
+State ONE of: URGENT (seek immediate emergency care), MODERATE (see doctor within 24-48 hours), or LOW (monitor at home, self-care)
+
+**ASSESSMENT:**
+- List 2-3 most likely conditions or causes based on symptoms
+- Note any red flag symptoms if present
+- Consider age-specific risk factors
+
+**RECOMMENDED ACTIONS:**
+Provide 3-4 specific, actionable steps:
+- For URGENT: Emergency department, call 911, what to tell dispatcher
+- For MODERATE: Schedule doctor visit, monitoring steps, symptom diary
+- For LOW: Home care measures, OTC medications, when to escalate
+
+**WHEN TO SEEK IMMEDIATE HELP:**
+List 2-3 warning signs that require immediate medical attention
+
+Keep response clear, specific, and under 200 words. Use medical terminology appropriately but explain in layman's terms. Always emphasize this is guidance only and not a diagnosis.`,
+                  },
+                ],
+              },
+            ],
+            generationConfig: {
+              temperature: 0.4,
+              maxOutputTokens: 500,
+              topP: 0.8,
+              topK: 40,
+            },
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.error) {
+        console.error("Gemini API Error:", data.error);
+        if (data.error.message?.includes("API_KEY")) {
+          setAiResponse(
+            "⚠️ API Key Error: Please add your Gemini API key to the code. Get one free at: https://aistudio.google.com/app/apikey"
+          );
+        } else {
+          setAiResponse(
+            `API Error: ${
+              data.error.message || "Unknown error"
+            }. Please consult a healthcare professional.`
+          );
+        }
+      } else if (
+        data.candidates &&
+        data.candidates[0]?.content?.parts?.[0]?.text
+      ) {
+        setAiResponse(data.candidates[0].content.parts[0].text);
+      } else {
+        setAiResponse(
+          "Unable to analyze at this time. Please consult a healthcare professional or call a nurse advice line."
+        );
+      }
+    } catch (error) {
+      console.error("Error calling Gemini API:", error);
+      setAiResponse(
+        "⚠️ Connection Error: Unable to reach the AI service. Please check:\n1. Your API key is correctly added\n2. Your internet connection\n3. The API endpoint URL\n\nFor now, please consult a healthcare professional."
+      );
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
   const handleSymptomNext = () => {
     if (hasCritical) {
@@ -285,7 +422,7 @@ export default function SymptomSieve() {
         level: "Urgent",
         color: "#dc2626",
         actions: [
-          "Call 911/Emergency services immediately.",
+          "Call 112/Emergency services immediately.",
           "Do not drive yourself.",
           "Have your list of medications ready.",
         ],
@@ -345,6 +482,158 @@ export default function SymptomSieve() {
     }
   };
 
+  // AI Result Card Component
+  const AIResultCard = ({ response }) => {
+    const sections = parseAIResponse(response);
+    const colors = getUrgencyColor(sections.urgency);
+
+    return (
+      <div
+        style={{
+          marginTop: "20px",
+          borderRadius: "12px",
+          border: "1px solid #e2e8f0",
+          overflow: "hidden",
+          backgroundColor: "#ffffff",
+        }}
+      >
+        {/* Urgency Level */}
+        {sections.urgency && (
+          <div
+            style={{
+              backgroundColor: colors.bg,
+              borderLeft: `4px solid ${colors.border}`,
+              padding: "16px 20px",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "11px",
+                fontWeight: "600",
+                color: colors.text,
+                letterSpacing: "0.5px",
+                textTransform: "uppercase",
+                marginBottom: "6px",
+              }}
+            >
+              Urgency Level
+            </div>
+            <div
+              style={{
+                fontSize: "15px",
+                fontWeight: "600",
+                color: colors.text,
+                lineHeight: "1.5",
+              }}
+            >
+              {sections.urgency}
+            </div>
+          </div>
+        )}
+
+        {/* Assessment */}
+        {sections.assessment && (
+          <div
+            style={{
+              padding: "20px",
+              borderBottom: "1px solid #e2e8f0",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "12px",
+                fontWeight: "600",
+                color: "#667eea",
+                letterSpacing: "0.5px",
+                textTransform: "uppercase",
+                marginBottom: "10px",
+              }}
+            >
+              Assessment
+            </div>
+            <div
+              style={{
+                fontSize: "14px",
+                color: "#475569",
+                lineHeight: "1.7",
+                whiteSpace: "pre-wrap",
+              }}
+            >
+              {sections.assessment}
+            </div>
+          </div>
+        )}
+
+        {/* Recommended Actions */}
+        {sections.actions && (
+          <div
+            style={{
+              padding: "20px",
+              backgroundColor: "#f8fafc",
+              borderBottom: "1px solid #e2e8f0",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "12px",
+                fontWeight: "600",
+                color: "#667eea",
+                letterSpacing: "0.5px",
+                textTransform: "uppercase",
+                marginBottom: "10px",
+              }}
+            >
+              Recommended Actions
+            </div>
+            <div
+              style={{
+                fontSize: "14px",
+                color: "#475569",
+                lineHeight: "1.7",
+                whiteSpace: "pre-wrap",
+              }}
+            >
+              {sections.actions}
+            </div>
+          </div>
+        )}
+
+        {/* Warning Signs */}
+        {sections.warning && (
+          <div
+            style={{
+              padding: "20px",
+              backgroundColor: "#fffbeb",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "12px",
+                fontWeight: "600",
+                color: "#d97706",
+                letterSpacing: "0.5px",
+                textTransform: "uppercase",
+                marginBottom: "10px",
+              }}
+            >
+              ⚠️ When to Seek Immediate Help
+            </div>
+            <div
+              style={{
+                fontSize: "14px",
+                color: "#78350f",
+                lineHeight: "1.7",
+                whiteSpace: "pre-wrap",
+              }}
+            >
+              {sections.warning}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // Reusable Disclaimer Component
   const Disclaimer = () => (
     <div style={STYLES.disclaimerBox}>
@@ -374,7 +663,7 @@ export default function SymptomSieve() {
     <div style={STYLES.container}>
       <div style={STYLES.card}>
         <div style={STYLES.header}>
-          <h1 style={STYLES.title}>💊 Symptom Sieve</h1>
+          <h1 style={STYLES.title}>Symptom Sieve</h1>
           <p style={STYLES.subtitle}>Quick health assessment guide</p>
         </div>
 
@@ -493,25 +782,85 @@ export default function SymptomSieve() {
         )}
 
         {showNotListed && (
-          <div style={{ textAlign: "center" }}>
-            <h3 style={STYLES.sectionTitle}>Symptom Not Listed</h3>
+          <div>
+            <h3 style={STYLES.sectionTitle}>Describe Your Symptom</h3>
             <p
               style={{
-                fontSize: "14px",
-                color: "#475569",
-                marginBottom: "20px",
-                lineHeight: "1.6",
+                fontSize: "13px",
+                color: "#64748b",
+                marginBottom: "15px",
               }}
             >
-              We recommend speaking with a nurse advice line or consulting your
-              doctor for symptoms not found in this basic assessment.
+              Tell us about the symptom you're experiencing
             </p>
+            <textarea
+              style={{
+                width: "100%",
+                padding: "14px",
+                boxSizing: "border-box",
+                borderRadius: "10px",
+                border: "2px solid #e2e8f0",
+                fontSize: "14px",
+                minHeight: "120px",
+                fontFamily: "inherit",
+                resize: "vertical",
+              }}
+              value={customSymptom}
+              onChange={(e) => setCustomSymptom(e.target.value)}
+              placeholder="Example: I have a sharp pain in my lower right abdomen that started yesterday..."
+            />
             <button
-              style={STYLES.button}
-              onClick={() => setShowNotListed(false)}
+              disabled={customSymptom.trim().length < 10 || isAnalyzing}
+              style={{
+                ...STYLES.button,
+                opacity:
+                  customSymptom.trim().length < 10 || isAnalyzing ? 0.5 : 1,
+              }}
+              onClick={analyzeCustomSymptom}
+            >
+              {isAnalyzing ? "Analyzing..." : "Get AI Assessment →"}
+            </button>
+            <button
+              style={STYLES.buttonSecondary}
+              onClick={() => {
+                setShowNotListed(false);
+                setCustomSymptom("");
+                setAiResponse(null);
+              }}
             >
               ← Go Back
             </button>
+
+            {aiResponse && (
+              <div>
+                <h4
+                  style={{
+                    margin: "20px 0 0 0",
+                    color: "#1e293b",
+                    fontSize: "15px",
+                    fontWeight: "600",
+                  }}
+                >
+                  AI Medical Triage Assessment:
+                </h4>
+                <AIResultCard response={aiResponse} />
+                <div
+                  style={{
+                    marginTop: "15px",
+                    padding: "12px",
+                    backgroundColor: "#fef3c7",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                    color: "#78350f",
+                    borderLeft: "3px solid #f59e0b",
+                  }}
+                >
+                  <strong>Note:</strong> This AI assessment is for informational
+                  purposes only. It is not a medical diagnosis. Please consult
+                  with a healthcare professional for proper evaluation.
+                </div>
+              </div>
+            )}
           </div>
         )}
 
