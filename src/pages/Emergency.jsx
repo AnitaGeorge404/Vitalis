@@ -1,7 +1,9 @@
-import { Heart, FileText, MapPin, Activity, Phone, Bot, Scan } from 'lucide-react'
+import { useState } from 'react'
+import { Heart, FileText, MapPin, Activity, Phone, Bot, Scan, Link } from 'lucide-react'
 import FeatureCard from '../components/FeatureCard'
 import SafetyBanner from '../components/SafetyBanner'
 import EmergencyCallButton from '../components/EmergencyCallButton'
+import SmartLinkGenerator from '../emergency/SmartLinkGenerator'
 import '../styles/cards.css'
 
 /**
@@ -9,6 +11,8 @@ import '../styles/cards.css'
  * Displays all emergency-related features as compact cards
  */
 function Emergency() {
+  const [showSmartLinkGenerator, setShowSmartLinkGenerator] = useState(false)
+
   const emergencyFeatures = [
     {
       title: 'Vital Scan',
@@ -51,6 +55,13 @@ function Emergency() {
       description: 'Real-time emergency guidance chatbot for critical situations',
       icon: Bot,
       route: '/emergency/chatbot'
+    },
+    {
+      title: 'Smart-Link (Triage Card)',
+      description: 'Generate secure emergency link for hospitals',
+      icon: Link,
+      onClick: () => setShowSmartLinkGenerator(true),
+      route: null
     }
   ]
 
@@ -77,9 +88,14 @@ function Emergency() {
             description={feature.description}
             icon={feature.icon}
             route={feature.route}
+            onClick={feature.onClick}
           />
         ))}
       </div>
+
+      {showSmartLinkGenerator && (
+        <SmartLinkGenerator onClose={() => setShowSmartLinkGenerator(false)} />
+      )}
     </div>
   )
 }

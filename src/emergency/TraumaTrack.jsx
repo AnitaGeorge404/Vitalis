@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
-import { Camera, Upload, AlertCircle, CheckCircle, XCircle, Phone } from 'lucide-react'
+import { Camera, Upload, AlertCircle, CheckCircle, XCircle, Phone, Link } from 'lucide-react'
+import SmartLinkGenerator from './SmartLinkGenerator'
 import './TraumaTrack.css'
 
 function TraumaTrack() {
@@ -7,6 +8,7 @@ function TraumaTrack() {
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [analysisResult, setAnalysisResult] = useState(null)
   const [error, setError] = useState(null)
+  const [showSmartLinkGenerator, setShowSmartLinkGenerator] = useState(false)
   const fileInputRef = useRef(null)
 
   const handleFileSelect = (file) => {
@@ -273,6 +275,16 @@ function TraumaTrack() {
                 <button onClick={handleRetake} className="btn btn-secondary">
                   Analyze Another Wound
                 </button>
+                {(analysisResult.risk === 'MODERATE' || analysisResult.risk === 'HIGH' || analysisResult.risk === 'CRITICAL') && (
+                  <button 
+                    onClick={() => setShowSmartLinkGenerator(true)} 
+                    className="btn btn-primary"
+                    style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
+                  >
+                    <Link size={20} />
+                    Generate Smart-Link for Hospital
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -287,6 +299,18 @@ function TraumaTrack() {
           Always seek immediate medical attention for serious injuries.
         </p>
       </div>
+
+      {showSmartLinkGenerator && (
+        <SmartLinkGenerator 
+          onClose={() => setShowSmartLinkGenerator(false)}
+          traumaEyeData={analysisResult ? {
+            injury_type: analysisResult.wound_characteristics?.type || 'Injury',
+            body_part: analysisResult.wound_characteristics?.location || 'Unknown',
+            severity: analysisResult.risk || 'Unknown',
+            confidence: analysisResult.confidence || 75
+          } : null}
+        />
+      )}
     </div>
   )
 }

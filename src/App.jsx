@@ -3,6 +3,7 @@ import Layout from './components/Layout'
 import Home from './pages/Home'
 import Emergency from './pages/Emergency'
 import HealthCheck from './pages/HealthCheck'
+import TriageCardView from './emergency/TriageCardView'
 
 // Emergency feature pages
 import CPRCoach from './emergency/CPRCoach'
@@ -24,12 +25,18 @@ import SymptomSieve from './health/SymptomSieve'
 function App() {
   return (
     <Router>
-      <Layout>
-        <Routes>
-          {/* Main Pages */}
-          <Route path="/" element={<Home />} />
-          <Route path="/emergency" element={<Emergency />} />
-          <Route path="/health" element={<HealthCheck />} />
+      <Routes>
+        {/* Public Route - No Layout */}
+        <Route path="/triage/:token" element={<TriageCardView />} />
+        
+        {/* Main App Routes with Layout */}
+        <Route path="/*" element={
+          <Layout>
+            <Routes>
+              {/* Main Pages */}
+              <Route path="/" element={<Home />} />
+              <Route path="/emergency" element={<Emergency />} />
+              <Route path="/health" element={<HealthCheck />} />
           
           {/* Emergency Features */}
           <Route path="/emergency/vital-scan" element={<VitalScan />} />
@@ -44,10 +51,12 @@ function App() {
           <Route path="/health/wound-watch" element={<WoundWatchHealth />} />
           <Route path="/health/burn-guide" element={<BurnGuide />} />
           <Route path="/health/respi-track" element={<RespiTrack />} />
-          <Route path="/health/doctor-checklist" element={<DoctorChecklist />} />
-          <Route path="/health/symptom-sieve" element={<SymptomSieve />} />
-        </Routes>
-      </Layout>
+              <Route path="/health/doctor-checklist" element={<DoctorChecklist />} />
+              <Route path="/health/symptom-sieve" element={<SymptomSieve />} />
+            </Routes>
+          </Layout>
+        } />
+      </Routes>
     </Router>
   )
 }

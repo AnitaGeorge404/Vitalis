@@ -9,12 +9,17 @@ import { ChevronRight } from 'lucide-react'
  * @param {string} description - Feature description
  * @param {Component} icon - Lucide React icon component
  * @param {string} route - Route to navigate to when clicked
+ * @param {Function} onClick - Optional custom click handler (overrides route navigation)
  */
-function FeatureCard({ title, description, icon: Icon, route }) {
+function FeatureCard({ title, description, icon: Icon, route, onClick }) {
   const navigate = useNavigate()
 
   const handleClick = () => {
-    navigate(route)
+    if (onClick) {
+      onClick()
+    } else if (route) {
+      navigate(route)
+    }
   }
 
   return (
