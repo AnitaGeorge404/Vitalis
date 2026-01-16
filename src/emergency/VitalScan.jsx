@@ -1,109 +1,111 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Heart, Activity, Camera, AlertCircle } from 'lucide-react';
+import { Heart, Activity, AlertCircle } from 'lucide-react';
 
-const BUFFER_SIZE = 300; // ~10 seconds of data
+const BUFFER_SIZE = 300; 
 const MS_BETWEEN_SAMPLES = 30; 
 
-export default function BackCameraPPG() {
+export default function WaveformPPG() {
   const [bpm, setBpm] = useState(0);
   const [isScanning, setIsScanning] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [feedback, setFeedback] = useState("Ready to scan");
+  const [feedback, setFeedback] = useState("Ready");
   
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+  const graphCanvasRef = useRef(null);
   const bufferRef = useRef([]);
   const timerRef = useRef(null);
 
+  // Helper to draw the real-time wave
+  const drawGraph = (data) => {
+    const canvas = graphCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = '#ef4444';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    
+    const slice = data.slice(-50); // Show last 50 points
+    const min = Math.min(...slice);
+    const max = Math.max(...slice);
+    const range = max - min || 1;
+
+    slice.forEach((val, i) => {
+      const x = (i / 50) * canvas.width;
+      const y = canvas.height - ((val - min) / range) * canvas.height;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+  };
+
   const startScan = async () => {
     try {
-      // "environment" tells the browser to use the back camera
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { 
-          facingMode: { exact: "environment" },
-          width: { ideal: 128 },
-          height: { ideal: 128 }
-        }
-      }).catch(() => {
-        // Fallback to any camera if "exact: environment" fails (e.g., on desktop)
-        return navigator.mediaDevices.getUserMedia({ video: true });
+        video: { facingMode: { ideal: "environment" }, width: 128, height: 128 }
       });
-
       videoRef.current.srcObject = stream;
-      videoRef.current.onloadedmetadata = () => {
-        videoRef.current.play();
-        bufferRef.current = [];
-        setProgress(0);
-        setIsScanning(true);
-        processFrame();
-      };
+      videoRef.current.play();
+      bufferRef.current = [];
+      setIsScanning(true);
+      requestAnimationFrame(processFrame);
     } catch (err) {
-      alert("Error: " + err.message);
+      setFeedback("Camera Error: " + err.message);
     }
   };
 
   const processFrame = () => {
-    if (!videoRef.current) return;
+    if (!isScanning || !videoRef.current) return;
 
     const canvas = canvasRef.current;
-    const video = videoRef.current;
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+    const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
 
     let r = 0, g = 0;
-    for (let i = 0; i < imageData.length; i += 4) {
-      r += imageData[i];
-      g += imageData[i + 1];
+    for (let i = 0; i < pixels.length; i += 4) {
+      r += pixels[i];
+      g += pixels[i+1];
     }
+    
+    // The "Pulse" signal: Green is most sensitive to blood volume
+    const signal = g / (pixels.length / 4); 
+    bufferRef.current.push(signal);
+    drawGraph(bufferRef.current);
 
-    // Ratio calculation is more stable than absolute brightness
-    // It helps ignore global lighting changes
-    const signal = r / (g + 1); 
-
-    // Quality check: Fingertip should make the screen look very red
-    if (r / imageData.length > 30) { 
-      bufferRef.current.push(signal);
-      setProgress((prev) => Math.min(prev + (100 / BUFFER_SIZE), 100));
-      setFeedback("Scanning... Hold VERY still");
+    // Quality check: Fingertip should be red/dark, not showing a room
+    if (r / (g + 1) > 1.5) { 
+      setProgress((bufferRef.current.length / BUFFER_SIZE) * 100);
+      setFeedback("Pulse detected... Keep still");
     } else {
-      setFeedback("Cover the back camera lens completely");
+      setFeedback("Cover lens & use bright light");
     }
 
     if (bufferRef.current.length >= BUFFER_SIZE) {
-      analyzeSignal(bufferRef.current);
+      analyzePulse(bufferRef.current);
       stopScan();
-    } else if (isScanning) {
+    } else {
       timerRef.current = setTimeout(processFrame, MS_BETWEEN_SAMPLES);
     }
   };
 
-  const analyzeSignal = (data) => {
-    // 1. Simple Moving Average to smooth the noise
-    const smoothed = [];
-    const windowSize = 5;
-    for (let i = windowSize; i < data.length - windowSize; i++) {
-      const avg = data.slice(i - windowSize, i + windowSize).reduce((a, b) => a + b) / (windowSize * 2);
-      smoothed.push(avg);
-    }
-
-    // 2. Count Zero Crossings (how many times the signal crosses its own average)
-    const mean = smoothed.reduce((a, b) => a + b) / smoothed.length;
-    let crossings = 0;
-    for (let i = 1; i < smoothed.length; i++) {
-      if ((smoothed[i] > mean && smoothed[i-1] <= mean) || (smoothed[i] < mean && smoothed[i-1] >= mean)) {
-        crossings++;
+  const analyzePulse = (data) => {
+    // Basic smoothing
+    const smooth = data.map((v, i, a) => i > 0 ? (v + a[i-1]) / 2 : v);
+    const mean = smooth.reduce((a, b) => a + b) / smooth.length;
+    
+    let peaks = 0;
+    for (let i = 2; i < smooth.length - 2; i++) {
+      if (smooth[i] > mean && smooth[i] > smooth[i-1] && smooth[i] > smooth[i+1]) {
+        peaks++;
+        i += 10; // Debounce
       }
     }
 
-    // Since a pulse has one "up" and one "down", 2 crossings = 1 beat
-    const beats = crossings / 2;
-    const durationInMinutes = (BUFFER_SIZE * MS_BETWEEN_SAMPLES) / 60000;
-    const finalBpm = Math.round(beats / durationInMinutes);
-
-    setBpm(finalBpm > 45 && finalBpm < 150 ? finalBpm : "Retry");
-    setFeedback(finalBpm > 45 && finalBpm < 150 ? "Scan Complete" : "Signal too noisy");
+    const calculatedBpm = Math.round(peaks * (60000 / (BUFFER_SIZE * MS_BETWEEN_SAMPLES)));
+    setBpm(calculatedBpm > 40 && calculatedBpm < 160 ? calculatedBpm : "Retry");
+    setFeedback(calculatedBpm > 40 ? "Done!" : "Weak signal");
   };
 
   const stopScan = () => {
@@ -115,36 +117,27 @@ export default function BackCameraPPG() {
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '40px auto', padding: '20px', textAlign: 'center', background: '#fff', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}>
-      <h2 style={{ color: '#1e293b' }}>Back-Cam Pulse</h2>
+    <div style={{ maxWidth: '400px', margin: '20px auto', padding: '20px', textAlign: 'center', background: '#fff', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
+      <h3>Bio-Scan (Waveform)</h3>
       
-      <div style={{ position: 'relative', width: '160px', height: '160px', borderRadius: '50%', background: isScanning ? '#fee2e2' : '#f1f5f9', margin: '30px auto', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', transition: '0.3s' }}>
-        <video ref={videoRef} style={{ display: 'none' }} playsInline />
-        <canvas ref={canvasRef} width="20" height="20" style={{ display: 'none' }} />
-        
-        {isScanning ? (
-          <Activity size={48} color="#ef4444" style={{ animation: 'pulse 1s infinite' }} />
-        ) : (
-          <>
-            <h1 style={{ fontSize: '42px', margin: 0, color: '#0f172a' }}>{bpm || "--"}</h1>
-            <p style={{ margin: 0, color: '#64748b', fontWeight: 'bold' }}>BPM</p>
-          </>
-        )}
+      <canvas ref={graphCanvasRef} width="300" height="100" style={{ background: '#f8fafc', borderRadius: '8px', marginBottom: '10px', width: '100%' }} />
+      
+      <div style={{ padding: '20px', borderRadius: '50%', background: '#f1f5f9', width: '100px', height: '100px', margin: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <h1 style={{ margin: 0 }}>{bpm || "--"}</h1>
       </div>
 
-      <div style={{ marginBottom: '20px' }}>
-        <div style={{ height: '6px', width: '100%', background: '#e2e8f0', borderRadius: '3px', overflow: 'hidden' }}>
-          <div style={{ width: `${progress}%`, height: '100%', background: '#ef4444', transition: 'width 0.1s' }} />
-        </div>
-        <p style={{ fontSize: '13px', color: '#475569', marginTop: '10px' }}>{feedback}</p>
+      <p style={{ color: '#64748b' }}>{feedback}</p>
+      
+      <div style={{ height: '8px', background: '#e2e8f0', borderRadius: '4px', margin: '15px 0', overflow: 'hidden' }}>
+        <div style={{ width: `${progress}%`, height: '100%', background: '#ef4444' }} />
       </div>
 
-      <button 
-        onClick={isScanning ? stopScan : startScan}
-        style={{ width: '100%', padding: '16px', borderRadius: '12px', border: 'none', backgroundColor: '#0f172a', color: 'white', fontSize: '16px', fontWeight: '600', cursor: 'pointer' }}
-      >
-        {isScanning ? "Stop" : "Begin Assessment"}
+      <button onClick={isScanning ? stopScan : startScan} style={{ width: '100%', padding: '12px', borderRadius: '8px', background: '#000', color: '#fff', border: 'none', fontWeight: 'bold' }}>
+        {isScanning ? "Stop" : "Start Scan"}
       </button>
+
+      <video ref={videoRef} style={{ display: 'none' }} playsInline />
+      <canvas ref={canvasRef} width="20" height="20" style={{ display: 'none' }} />
     </div>
   );
 }
