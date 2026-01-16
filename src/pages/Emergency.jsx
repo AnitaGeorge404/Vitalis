@@ -26,6 +26,24 @@ function Emergency() {
       route: '/emergency/aed-finder'
     },
     {
+      title: 'Trauma Track',
+      description: 'Assessment and monitoring for traumatic injuries',
+      icon: '🩹',
+      route: '/emergency/trauma-track'
+    },
+    {
+      title: 'Eye & Respiratory Track',
+      description: 'Emergency guidance for eye injuries and breathing problems',
+      icon: '👁️',
+      route: '/emergency/eye-respiratory-track'
+    },
+    {
+      title: 'Wound Watch',
+      description: 'Emergency wound assessment and immediate care guidance',
+      icon: '🔴',
+      route: '/emergency/wound-watch'
+    },
+    {
       title: 'Smart Emergency Contacts',
       description: 'Quick alert system for emergency contacts',
       icon: '📞',
