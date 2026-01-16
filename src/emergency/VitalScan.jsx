@@ -1,142 +1,144 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Heart, Activity, AlertCircle } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Heart, Activity, Zap } from 'lucide-react';
 
-const BUFFER_SIZE = 300; 
-const MS_BETWEEN_SAMPLES = 30; 
+const DURATION_SECONDS = 10;
+const FPS = 30;
+const TOTAL_SAMPLES = DURATION_SECONDS * FPS;
 
-export default function WaveformPPG() {
+export default function MobilePulseScanner() {
   const [bpm, setBpm] = useState(0);
   const [isScanning, setIsScanning] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [feedback, setFeedback] = useState("Ready");
+  const [feedback, setFeedback] = useState("Tap to Start");
   
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-  const graphCanvasRef = useRef(null);
   const bufferRef = useRef([]);
-  const timerRef = useRef(null);
 
-  // Helper to draw the real-time wave
-  const drawGraph = (data) => {
-    const canvas = graphCanvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = '#ef4444';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    
-    const slice = data.slice(-50); // Show last 50 points
-    const min = Math.min(...slice);
-    const max = Math.max(...slice);
-    const range = max - min || 1;
-
-    slice.forEach((val, i) => {
-      const x = (i / 50) * canvas.width;
-      const y = canvas.height - ((val - min) / range) * canvas.height;
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    });
-    ctx.stroke();
-  };
-
-  const startScan = async () => {
+  const startMobileScan = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: "environment" }, width: 128, height: 128 }
+        video: { 
+          facingMode: { ideal: "environment" },
+          width: { ideal: 128 },
+          height: { ideal: 128 },
+          frameRate: { ideal: 30 }
+        }
       });
-      videoRef.current.srcObject = stream;
-      videoRef.current.play();
-      bufferRef.current = [];
-      setIsScanning(true);
-      requestAnimationFrame(processFrame);
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+        
+        bufferRef.current = [];
+        setBpm(0);
+        setIsScanning(true);
+        setFeedback("Cover lens & hold to light");
+        
+        // Use a standard interval for consistent mobile timing
+        const interval = setInterval(() => {
+          if (bufferRef.current.length >= TOTAL_SAMPLES) {
+            clearInterval(interval);
+            calculateMobileBPM();
+            stopStream(stream);
+          } else {
+            captureFrame();
+          }
+        }, 1000 / FPS);
+      }
     } catch (err) {
-      setFeedback("Camera Error: " + err.message);
+      setFeedback("Camera Error. Use HTTPS.");
     }
   };
 
-  const processFrame = () => {
-    if (!isScanning || !videoRef.current) return;
-
+  const captureFrame = () => {
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-    const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    const video = videoRef.current;
+    if (!canvas || !video) return;
 
-    let r = 0, g = 0;
-    for (let i = 0; i < pixels.length; i += 4) {
-      r += pixels[i];
-      g += pixels[i+1];
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+
+    let redSum = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      redSum += data[i]; // Blood volume changes are most visible in the red channel
     }
     
-    // The "Pulse" signal: Green is most sensitive to blood volume
-    const signal = g / (pixels.length / 4); 
-    bufferRef.current.push(signal);
-    drawGraph(bufferRef.current);
-
-    // Quality check: Fingertip should be red/dark, not showing a room
-    if (r / (g + 1) > 1.5) { 
-      setProgress((bufferRef.current.length / BUFFER_SIZE) * 100);
-      setFeedback("Pulse detected... Keep still");
-    } else {
-      setFeedback("Cover lens & use bright light");
-    }
-
-    if (bufferRef.current.length >= BUFFER_SIZE) {
-      analyzePulse(bufferRef.current);
-      stopScan();
-    } else {
-      timerRef.current = setTimeout(processFrame, MS_BETWEEN_SAMPLES);
-    }
+    const avgRed = redSum / (data.length / 4);
+    bufferRef.current.push(avgRed);
+    setProgress((bufferRef.current.length / TOTAL_SAMPLES) * 100);
   };
 
-  const analyzePulse = (data) => {
-    // Basic smoothing
-    const smooth = data.map((v, i, a) => i > 0 ? (v + a[i-1]) / 2 : v);
-    const mean = smooth.reduce((a, b) => a + b) / smooth.length;
-    
+  const calculateMobileBPM = () => {
+    const data = bufferRef.current;
+    if (data.length < TOTAL_SAMPLES) return;
+
+    // 1. Simple High-Pass Filter (remove the "drift" from hand shaking)
+    const filtered = [];
+    for (let i = 1; i < data.length; i++) {
+      filtered.push(data[i] - data[i - 1]);
+    }
+
+    // 2. Find Peaks (counting the heart beats)
     let peaks = 0;
-    for (let i = 2; i < smooth.length - 2; i++) {
-      if (smooth[i] > mean && smooth[i] > smooth[i-1] && smooth[i] > smooth[i+1]) {
+    for (let i = 1; i < filtered.length - 1; i++) {
+      if (filtered[i] > filtered[i - 1] && filtered[i] > filtered[i + 1] && filtered[i] > 0) {
         peaks++;
-        i += 10; // Debounce
+        i += 10; // "Refractory period" to prevent double-counting 1 beat
       }
     }
 
-    const calculatedBpm = Math.round(peaks * (60000 / (BUFFER_SIZE * MS_BETWEEN_SAMPLES)));
-    setBpm(calculatedBpm > 40 && calculatedBpm < 160 ? calculatedBpm : "Retry");
-    setFeedback(calculatedBpm > 40 ? "Done!" : "Weak signal");
+    const result = Math.round(peaks * (60 / DURATION_SECONDS));
+    
+    if (result > 45 && result < 160) {
+      setBpm(result);
+      setFeedback("Success!");
+    } else {
+      setFeedback("Weak signal. Try again.");
+    }
+    setIsScanning(false);
   };
 
-  const stopScan = () => {
-    setIsScanning(false);
-    if (videoRef.current?.srcObject) {
-      videoRef.current.srcObject.getTracks().forEach(t => t.stop());
-    }
-    clearTimeout(timerRef.current);
+  const stopStream = (stream) => {
+    stream.getTracks().forEach(track => track.stop());
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '20px auto', padding: '20px', textAlign: 'center', background: '#fff', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
-      <h3>Bio-Scan (Waveform)</h3>
+    <div style={{ maxWidth: '350px', margin: '30px auto', padding: '25px', textAlign: 'center', backgroundColor: '#fff', borderRadius: '24px', boxShadow: '0 15px 35px rgba(0,0,0,0.1)', fontFamily: 'system-ui' }}>
+      <h2 style={{ fontSize: '1.2rem', marginBottom: '20px' }}>Phone Pulse Check</h2>
       
-      <canvas ref={graphCanvasRef} width="300" height="100" style={{ background: '#f8fafc', borderRadius: '8px', marginBottom: '10px', width: '100%' }} />
-      
-      <div style={{ padding: '20px', borderRadius: '50%', background: '#f1f5f9', width: '100px', height: '100px', margin: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <h1 style={{ margin: 0 }}>{bpm || "--"}</h1>
+      <div style={{ width: '140px', height: '140px', borderRadius: '50%', backgroundColor: isScanning ? '#fff1f2' : '#f8fafc', margin: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '4px solid #f1f5f9', transition: 'all 0.3s' }}>
+        {isScanning ? (
+          <Activity size={40} color="#ef4444" style={{ animation: 'pulse 0.8s infinite' }} />
+        ) : (
+          <>
+            <span style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#1e293b' }}>{bpm || '--'}</span>
+            <span style={{ fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase' }}>BPM</span>
+          </>
+        )}
       </div>
 
-      <p style={{ color: '#64748b' }}>{feedback}</p>
-      
-      <div style={{ height: '8px', background: '#e2e8f0', borderRadius: '4px', margin: '15px 0', overflow: 'hidden' }}>
-        <div style={{ width: `${progress}%`, height: '100%', background: '#ef4444' }} />
+      <p style={{ color: '#475569', fontSize: '0.9rem', margin: '20px 0' }}>{feedback}</p>
+
+      <div style={{ height: '8px', width: '100%', backgroundColor: '#f1f5f9', borderRadius: '4px', marginBottom: '25px', overflow: 'hidden' }}>
+        <div style={{ width: `${progress}%`, height: '100%', backgroundColor: '#ef4444', transition: 'width 0.2s linear' }} />
       </div>
 
-      <button onClick={isScanning ? stopScan : startScan} style={{ width: '100%', padding: '12px', borderRadius: '8px', background: '#000', color: '#fff', border: 'none', fontWeight: 'bold' }}>
-        {isScanning ? "Stop" : "Start Scan"}
+      <button 
+        onClick={startMobileScan}
+        disabled={isScanning}
+        style={{ width: '100%', padding: '16px', borderRadius: '14px', border: 'none', backgroundColor: '#1e293b', color: '#fff', fontSize: '1rem', fontWeight: 'bold', cursor: 'pointer', opacity: isScanning ? 0.7 : 1 }}
+      >
+        {isScanning ? "Scanning..." : "Start Assessment"}
       </button>
 
-      <video ref={videoRef} style={{ display: 'none' }} playsInline />
+      <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#fff9db', borderRadius: '12px', fontSize: '0.75rem', textAlign: 'left', color: '#856404', display: 'flex', gap: '10px' }}>
+        <Zap size={24} />
+        <span><strong>IMPORTANT:</strong> Hold your phone up to a <strong>bright lamp</strong> or window so light shines <em>through</em> your finger into the camera.</span>
+      </div>
+
+      <video ref={videoRef} style={{ display: 'none' }} playsInline muted />
       <canvas ref={canvasRef} width="20" height="20" style={{ display: 'none' }} />
     </div>
   );
