@@ -58,16 +58,6 @@ function FeedbackPanel({
           ⚠️ Fix posture before focusing on rhythm
         </div>
       )}
-
-      <div className="compression-tips">
-        <h4>💡 Compression Tips</h4>
-        <ul>
-          <li>✓ Make clear UP and DOWN motions with your shoulders</li>
-          <li>✓ Each compression should be at least 2 inches (5cm) deep</li>
-          <li>✓ Allow full chest recoil between compressions</li>
-          <li>✓ Aim for 100-120 compressions per minute</li>
-        </ul>
-      </div>
     </div>
   )
 }

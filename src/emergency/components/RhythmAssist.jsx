@@ -134,11 +134,6 @@ function RhythmAssist({ postureCorrect, compressionRate, onRhythmFeedback, isAct
           Beats: {beatCount}
         </div>
       )}
-
-      <div className="rhythm-info">
-        <p>💡 Compress on each beat for optimal timing</p>
-        <p>📍 Aim for 110 compressions per minute</p>
-      </div>
     </div>
   )
 }
