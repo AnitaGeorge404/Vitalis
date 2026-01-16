@@ -13,8 +13,11 @@ class CPRAnalyzer {
     this.lastShoulderY = null;
     this.isCompressing = false;
     this.compressionTimestamps = [];
-    this.peakShoulderY = null;
-    this.troughShoulderY = null;
+    this.compressionStartY = null;
+    this.compressionMinY = null; // Lowest point (most compressed)
+    this.compressionMaxY = null; // Highest point (least compressed)
+    this.lastCompressionTime = 0;
+    this.minTimeBetweenCompressions = 300; // Minimum 300ms between compressions
 
     // Posture validation
     this.isPostureValid = false;
@@ -40,7 +43,8 @@ class CPRAnalyzer {
     this.ELBOW_ANGLE_GOOD = 155;        // Excellent form
     this.ELBOW_ANGLE_ACCEPTABLE = 135;  // Still valid CPR
     this.SPINE_ANGLE_CHANGE_THRESHOLD = 15;
-    this.COMPRESSION_THRESHOLD = 0.010; // LOWERED from 0.015 for better detection
+    this.COMPRESSION_DEPTH_MIN = 0.008; // Minimum depth to count as valid compression (lowered)
+    this.COMPRESSION_VELOCITY_THRESHOLD = 0.003; // Minimum movement speed to detect motion
     this.HAND_POSITION_TOLERANCE = 0.1;
 
     this.initAudio();
@@ -318,10 +322,20 @@ class CPRAnalyzer {
 
   resetCompressionState() {
     this.isCompressing = false;
-    this.peakShoulderY = null;
-    this.troughShoulderY = null;
+    this.compressionStartY = null;
+    this.compressionMinY = null;
+    this.compressionMaxY = null;
   }
 
+  /**
+   * IMPROVED COMPRESSION DETECTION
+   * Camera coordinates: Y increases downward (0 at top, 1 at bottom)
+   * During CPR compression:
+   * - Shoulders move DOWN (Y increases) - this is the compression phase
+   * - Shoulders move UP (Y decreases) - this is the release/recoil phase
+   * 
+   * Count compression at the END of compression phase (when starting to come back up)
+   */
   detectCompression(landmarks) {
     const leftShoulder = landmarks[11];
     const rightShoulder = landmarks[12];
@@ -330,6 +344,7 @@ class CPRAnalyzer {
 
     const avgShoulderY = (leftShoulder.y + rightShoulder.y) / 2;
 
+    // Apply smoothing
     this.shoulderYHistory.push(avgShoulderY);
     if (this.shoulderYHistory.length > this.shoulderYHistorySize) {
       this.shoulderYHistory.shift();
@@ -338,48 +353,66 @@ class CPRAnalyzer {
     const smoothedShoulderY = this.shoulderYHistory.reduce((sum, val) => sum + val, 0) / 
                              this.shoulderYHistory.length;
 
+    // Initialize tracking variables
     if (this.lastShoulderY === null) {
       this.lastShoulderY = smoothedShoulderY;
-      this.peakShoulderY = smoothedShoulderY;
-      this.troughShoulderY = smoothedShoulderY;
+      this.compressionMinY = smoothedShoulderY;
+      this.compressionMaxY = smoothedShoulderY;
       return;
     }
 
     const deltaY = smoothedShoulderY - this.lastShoulderY;
+    const velocity = Math.abs(deltaY);
 
-    if (smoothedShoulderY < this.peakShoulderY) {
-      this.peakShoulderY = smoothedShoulderY;
+    // Track min and max positions
+    if (smoothedShoulderY > this.compressionMaxY) {
+      this.compressionMaxY = smoothedShoulderY; // Shoulders moved down (more compressed)
+    }
+    if (smoothedShoulderY < this.compressionMinY) {
+      this.compressionMinY = smoothedShoulderY; // Shoulders moved up (less compressed)
     }
 
-    if (smoothedShoulderY > this.troughShoulderY) {
-      this.troughShoulderY = smoothedShoulderY;
-    }
+    const now = Date.now();
+    const timeSinceLastCompression = now - this.lastCompressionTime;
 
-    // IMPROVED: Detect upward motion (compression phase)
-    if (deltaY > this.COMPRESSION_THRESHOLD && !this.isCompressing) {
+    // STATE 1: Not currently compressing - detect start of downward motion (compression)
+    if (!this.isCompressing && deltaY > this.COMPRESSION_VELOCITY_THRESHOLD) {
+      // Shoulders moving DOWN (Y increasing) - start of compression
       this.isCompressing = true;
-      this.peakShoulderY = smoothedShoulderY;
+      this.compressionStartY = smoothedShoulderY;
+      this.compressionMaxY = smoothedShoulderY; // Reset max to current position
+      console.log('[CPR] Compression started - shoulders moving down');
     }
 
-    // IMPROVED: Detect downward motion (release phase) - count the compression
-    if (deltaY < -this.COMPRESSION_THRESHOLD && this.isCompressing) {
-      const compressionDepth = this.troughShoulderY - this.peakShoulderY;
+    // STATE 2: Currently compressing - detect end of compression (upward motion)
+    if (this.isCompressing && deltaY < -this.COMPRESSION_VELOCITY_THRESHOLD) {
+      // Shoulders moving UP (Y decreasing) - compression complete, coming back up
+      const compressionDepth = this.compressionMaxY - this.compressionMinY;
       
-      // Count compression if depth is meaningful (lowered threshold for better detection)
-      if (compressionDepth > this.COMPRESSION_THRESHOLD) {
+      // Validate compression depth and timing
+      if (compressionDepth >= this.COMPRESSION_DEPTH_MIN && 
+          timeSinceLastCompression >= this.minTimeBetweenCompressions) {
+        
         this.isCompressing = false;
         this.compressionCount++;
-        this.compressionTimestamps.push(Date.now());
+        this.lastCompressionTime = now;
+        this.compressionTimestamps.push(now);
 
-        const tenSecondsAgo = Date.now() - 10000;
+        // Keep only last 10 seconds of timestamps for rate calculation
+        const tenSecondsAgo = now - 10000;
         this.compressionTimestamps = this.compressionTimestamps.filter(
           timestamp => timestamp > tenSecondsAgo
         );
 
-        console.log(`[CPR] Compression #${this.compressionCount} detected (depth: ${compressionDepth.toFixed(4)})`);
+        console.log(`[CPR] ✓ Compression #${this.compressionCount} counted! Depth: ${(compressionDepth * 100).toFixed(2)}% of screen`);
 
-        this.troughShoulderY = smoothedShoulderY;
+        // Reset for next compression
+        this.compressionMinY = smoothedShoulderY;
+      } else if (compressionDepth < this.COMPRESSION_DEPTH_MIN) {
+        console.log(`[CPR] × Compression too shallow (${(compressionDepth * 100).toFixed(2)}%), not counted`);
+        this.isCompressing = false;
       } else {
+        console.log('[CPR] × Compression too soon, not counted');
         this.isCompressing = false;
       }
     }

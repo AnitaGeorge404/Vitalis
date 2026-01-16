@@ -49,11 +49,9 @@
 
 /* Main Content - Grid Layout */
 .cpr-main-content {
-/* Main Content - Grid Layout */
-.cpr-main-content {
   flex: 1;
   display: grid;
-  grid-template-columns: 1fr 420px;
+  grid-template-columns: 1fr 1fr;
   gap: 0;
   min-height: 0;
   overflow: hidden;
@@ -69,6 +67,7 @@
   position: relative;
   overflow: hidden;
   border-right: 1px solid #e2e8f0;
+  padding: 2rem;
 }
 
 /* Control Panel - Clean Light Design */
@@ -127,25 +126,33 @@
 /* Responsive Design - Modern */
 @media (max-width: 1200px) {
   .cpr-main-content {
-    grid-template-columns: 1fr 360px;
+    grid-template-columns: 1fr 1fr;
   }
 
   .cpr-control-panel {
     padding: 1.5rem;
     gap: 1.25rem;
   }
+  
+  .cpr-camera-section {
+    padding: 1.5rem;
+  }
 }
 
 @media (max-width: 768px) {
   .cpr-main-content {
     grid-template-columns: 1fr;
-    grid-template-rows: 1fr auto;
+    grid-template-rows: 60vh auto;
+  }
+
+  .cpr-camera-section {
+    padding: 1rem;
   }
 
   .cpr-control-panel {
-    max-height: 45vh;
+    max-height: 40vh;
     border-right: none;
-    border-top: 1px solid #e2e8f0;
+    border-top: 2px solid #e2e8f0;
     box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.03);
   }
 

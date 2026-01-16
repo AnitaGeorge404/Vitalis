@@ -120,6 +120,35 @@
   font-size: 0.9rem;
 }
 
+.compression-tips {
+  background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+  border: 2px solid #38bdf8;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-top: 1rem;
+}
+
+.compression-tips h4 {
+  font-size: 1rem;
+  color: #0c4a6e;
+  margin: 0 0 0.75rem 0;
+  font-weight: 700;
+}
+
+.compression-tips ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.compression-tips li {
+  padding: 0.5rem 0;
+  color: #0c4a6e;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
 @media (max-width: 768px) {
   .feedback-panel {
     padding: 1rem;
