@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Bandage, Flame, Eye, Hospital } from 'lucide-react'
+import { Bandage, Flame, Eye, Hospital, Pill } from 'lucide-react'
 import FeatureCard from '../components/FeatureCard'
 import SafetyBanner from '../components/SafetyBanner'
 import SymptomHistory from '../components/SymptomHistory'
@@ -12,6 +12,12 @@ import '../styles/cards.css'
 function HealthCheck() {
   const [currentCheck, setCurrentCheck] = useState(null)
   const healthFeatures = [
+    {
+      title: 'Pill Identifier',
+      description: 'Identify medications by photo, shape, color, or imprint',
+      icon: Pill,
+      route: '/health/pill-identifier'
+    },
     {
       title: 'Wound Watch',
       description: 'Assess and track wound healing progress',

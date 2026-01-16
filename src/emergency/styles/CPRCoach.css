@@ -95,7 +95,7 @@
 .cpr-main-content {
   flex: 1;
   display: grid;
-  grid-template-columns: 1.5fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 0;
   min-height: 600px;
   max-height: calc(100vh - 120px);
@@ -110,6 +110,7 @@
 .cpr-camera-section {
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
@@ -337,7 +338,7 @@
 /* Responsive Design - Modern */
 @media (max-width: 1200px) {
   .cpr-main-content {
-    grid-template-columns: 1.5fr 1fr;
+    grid-template-columns: 1fr 1fr;
     max-height: calc(100vh - 100px);
   }
 

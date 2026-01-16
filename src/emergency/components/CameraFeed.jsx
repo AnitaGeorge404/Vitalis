@@ -102,7 +102,7 @@ function CameraFeed({ onPostureUpdate, onCompressionUpdate, isActive }) {
         />
       </div>
       <div className="camera-instructions">
-        <p>📍 Position yourself side-on with shoulders, elbows, wrists, and hips visible</p>
+        <p>Position yourself side-on with shoulders, elbows, wrists, and hips visible</p>
       </div>
     </div>
   )

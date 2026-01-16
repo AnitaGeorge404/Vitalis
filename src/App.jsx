@@ -16,6 +16,7 @@ import EmergencyChatbot from './emergency/EmergencyChatbot'
 import VitalScan from './emergency/VitalScan'
 
 // Health check feature pages
+import PillIdentifier from './health/PillIdentifier'
 import WoundWatchHealth from './health/WoundWatch'
 import RespiTrack from './health/RespiTrack'
 import BurnGuide from './health/BurnGuide'
@@ -48,6 +49,7 @@ function App() {
           <Route path="/emergency/contacts" element={<EmergencyContacts />} />
           <Route path="/emergency/chatbot" element={<EmergencyChatbot />} />
           {/* Health Check Features */}
+          <Route path="/health/pill-identifier" element={<PillIdentifier />} />
           <Route path="/health/wound-watch" element={<WoundWatchHealth />} />
           <Route path="/health/burn-guide" element={<BurnGuide />} />
           <Route path="/health/respi-track" element={<RespiTrack />} />

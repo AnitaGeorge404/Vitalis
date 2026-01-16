@@ -115,8 +115,8 @@ function CPRCoach() {
         <div className="instructions-grid">
           <div className="instruction-card">
             <div className="instruction-number">1</div>
-            <h3>📸 Position Camera</h3>
-            <p>Set up side view showing shoulders, elbows, wrists, and hips</p>
+            <h3>� Position Yourself</h3>
+            <p>Position yourself side-on with shoulders, elbows, wrists, and hips visible</p>
           </div>
 
           <div className="instruction-card">
