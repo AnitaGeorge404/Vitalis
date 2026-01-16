@@ -12,13 +12,13 @@ import TraumaTrack from './emergency/TraumaTrack'
 import BurnHelp from './emergency/BurnHelp'
 import EmergencyContacts from './emergency/EmergencyContacts'
 import EmergencyChatbot from './emergency/EmergencyChatbot'
+import VitalScan from './emergency/VitalScan'
 
 // Health check feature pages
 import WoundWatchHealth from './health/WoundWatch'
 import RespiTrack from './health/RespiTrack'
 import BurnGuide from './health/BurnGuide'
 import DoctorChecklist from './health/DoctorChecklist'
-import DoctorPrep from './health/DoctorPrep'
 import SymptomSieve from './health/SymptomSieve'
 
 function App() {
@@ -32,6 +32,7 @@ function App() {
           <Route path="/health" element={<HealthCheck />} />
           
           {/* Emergency Features */}
+          <Route path="/emergency/vital-scan" element={<VitalScan />} />
           <Route path="/emergency/cpr" element={<CPRCoach />} />
           <Route path="/emergency/action-cards" element={<ActionCards />} />
           <Route path="/emergency/aed-finder" element={<AEDFinder />} />
@@ -44,7 +45,6 @@ function App() {
           <Route path="/health/burn-guide" element={<BurnGuide />} />
           <Route path="/health/respi-track" element={<RespiTrack />} />
           <Route path="/health/doctor-checklist" element={<DoctorChecklist />} />
-          <Route path="/health/doctor-prep" element={<DoctorPrep />} />
           <Route path="/health/symptom-sieve" element={<SymptomSieve />} />
         </Routes>
       </Layout>
