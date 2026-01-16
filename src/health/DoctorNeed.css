@@ -185,7 +185,7 @@
   user-select: none;
 }
 
-.symptom-checkbox input[type='checkbox'] {
+.symptom-checkbox input[type="checkbox"] {
   width: 20px;
   height: 20px;
   cursor: pointer;
@@ -206,7 +206,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -465,8 +466,8 @@
   background: white;
 }
 
-.option-label input[type='radio'],
-.checkbox-label input[type='checkbox'] {
+.option-label input[type="radio"],
+.checkbox-label input[type="checkbox"] {
   width: 18px;
   height: 18px;
   cursor: pointer;
@@ -699,6 +700,65 @@
   margin-left: 0.75rem;
 }
 
+/* ============================================================================
+   Explanation & Change Prompt Sections (NEW)
+   ============================================================================ */
+
+.explanation-section {
+  padding: 1.5rem;
+  background: #f0f9ff;
+  border-radius: 10px;
+  border-left: 4px solid;
+  border: 1px solid #bfdbfe;
+  border-left: 4px solid;
+}
+
+.explanation-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e40af;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.explanation-text {
+  color: #1e293b;
+  line-height: 1.6;
+  font-size: 0.95rem;
+  margin-bottom: 0.75rem;
+}
+
+.symptom-influence {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+.change-prompt-section {
+  padding: 1.5rem;
+  background: #fef3c7;
+  border-radius: 10px;
+  border-left: 4px solid #f59e0b;
+  border: 1px solid #fcd34d;
+  border-left: 4px solid #f59e0b;
+}
+
+.change-prompt-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #92400e;
+  margin-bottom: 0.75rem;
+}
+
+.change-prompt-text {
+  color: #78350f;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
 .symptom-list,
 .factors-list,
 .warning-list {
@@ -731,17 +791,17 @@
   text-transform: uppercase;
 }
 
-.severity-badge[data-severity='mild'] {
+.severity-badge[data-severity="mild"] {
   background: #d1fae5;
   color: #065f46;
 }
 
-.severity-badge[data-severity='moderate'] {
+.severity-badge[data-severity="moderate"] {
   background: #fef3c7;
   color: #92400e;
 }
 
-.severity-badge[data-severity='severe'] {
+.severity-badge[data-severity="severe"] {
   background: #fee2e2;
   color: #991b1b;
 }

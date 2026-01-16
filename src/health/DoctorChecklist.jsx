@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import SymptomSelector from './SymptomSelector';
-import VitalInputs from './VitalInputs';
-import ContextualInputs from './ContextualInputs';
-import ResultsDisplay from './ResultsDisplay';
-import { calculateTriage } from './TriageEngine';
-import SafetyBanner from '../components/SafetyBanner';
-import FollowUpReminder from '../components/FollowUpReminder';
-import './DoctorNeed.css';
+import React, { useState, useEffect } from "react";
+import SymptomSelector from "./SymptomSelector";
+import VitalInputs from "./VitalInputs";
+import ContextualInputs from "./ContextualInputs";
+import ResultsDisplay from "./ResultsDisplay";
+import { calculateTriage } from "./TriageEngine";
+import SafetyBanner from "../components/SafetyBanner";
+import FollowUpReminder from "../components/FollowUpReminder";
+import "./DoctorNeed.css";
 
 /**
  * "Do I Need a Doctor?" Checklist Feature
@@ -23,13 +23,13 @@ function DoctorChecklist() {
 
   // Load assessment history from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem('doctorChecklist_history');
+    const saved = localStorage.getItem("doctorChecklist_history");
     if (saved) {
       try {
         const history = JSON.parse(saved);
         setAssessmentHistory(history.slice(-5)); // Keep last 5 assessments
       } catch (e) {
-        console.log('Could not load assessment history');
+        console.log("Could not load assessment history");
       }
     }
   }, []);
@@ -53,7 +53,7 @@ function DoctorChecklist() {
       ageGroup: context.ageGroup,
       chronicConditions: context.chronicConditions || [],
       recentEvents: context.recentEvents || [],
-      pregnancyStatus: context.pregnancyStatus || false
+      pregnancyStatus: context.pregnancyStatus || false,
     };
 
     const triageResult = calculateTriage(assessment);
@@ -65,10 +65,13 @@ function DoctorChecklist() {
         timestamp: new Date().toISOString(),
         level: triageResult.level,
         score: triageResult.score,
-        symptomCount: symptoms.length
-      }
+        symptomCount: symptoms.length,
+      },
     ];
-    localStorage.setItem('doctorChecklist_history', JSON.stringify(newHistory.slice(-5)));
+    localStorage.setItem(
+      "doctorChecklist_history",
+      JSON.stringify(newHistory.slice(-5))
+    );
     setAssessmentHistory(newHistory);
 
     setResult(triageResult);
@@ -94,34 +97,44 @@ function DoctorChecklist() {
 
       <div className="page-header health-header">
         <h1 className="page-title">🏥 Do I Need a Doctor?</h1>
-        <p className="page-subtitle">
-          Health assessment and decision support
-        </p>
+        <p className="page-subtitle">Health assessment and decision support</p>
       </div>
 
       <div className="checklist-container">
         {/* Progress Indicator */}
         <div className="progress-indicator">
           <div className="progress-steps">
-            <div className={`progress-step ${step >= 1 ? 'active' : ''} ${step > 1 ? 'completed' : ''}`}>
+            <div
+              className={`progress-step ${step >= 1 ? "active" : ""} ${
+                step > 1 ? "completed" : ""
+              }`}
+            >
               <span className="step-number">1</span>
               <span className="step-label">Symptoms</span>
             </div>
             <div className="progress-connector"></div>
 
-            <div className={`progress-step ${step >= 2 ? 'active' : ''} ${step > 2 ? 'completed' : ''}`}>
+            <div
+              className={`progress-step ${step >= 2 ? "active" : ""} ${
+                step > 2 ? "completed" : ""
+              }`}
+            >
               <span className="step-number">2</span>
               <span className="step-label">Vitals</span>
             </div>
             <div className="progress-connector"></div>
 
-            <div className={`progress-step ${step >= 3 ? 'active' : ''} ${step > 3 ? 'completed' : ''}`}>
+            <div
+              className={`progress-step ${step >= 3 ? "active" : ""} ${
+                step > 3 ? "completed" : ""
+              }`}
+            >
               <span className="step-number">3</span>
               <span className="step-label">Context</span>
             </div>
             <div className="progress-connector"></div>
 
-            <div className={`progress-step ${step >= 4 ? 'active' : ''}`}>
+            <div className={`progress-step ${step >= 4 ? "active" : ""}`}>
               <span className="step-number">✓</span>
               <span className="step-label">Result</span>
             </div>
@@ -180,16 +193,21 @@ function DoctorChecklist() {
         <div className="history-section">
           <h3>📋 Recent Assessments</h3>
           <div className="history-list">
-            {assessmentHistory.slice().reverse().map((assessment, idx) => (
-              <div key={idx} className="history-item">
-                <span className="history-time">
-                  {new Date(assessment.timestamp).toLocaleDateString()}
-                </span>
-                <span className={`history-level history-${assessment.level.toLowerCase()}`}>
-                  {assessment.level} - Score: {assessment.score}
-                </span>
-              </div>
-            ))}
+            {assessmentHistory
+              .slice()
+              .reverse()
+              .map((assessment, idx) => (
+                <div key={idx} className="history-item">
+                  <span className="history-time">
+                    {new Date(assessment.timestamp).toLocaleDateString()}
+                  </span>
+                  <span
+                    className={`history-level history-${assessment.level.toLowerCase()}`}
+                  >
+                    {assessment.level} - Score: {assessment.score}
+                  </span>
+                </div>
+              ))}
           </div>
         </div>
       )}

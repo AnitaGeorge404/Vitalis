@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { AGE_GROUPS, CHRONIC_CONDITIONS, RECENT_EVENTS } from './TriageEngine';
-import './DoctorNeed.css';
+import React, { useState } from "react";
+import { AGE_GROUPS, CHRONIC_CONDITIONS, RECENT_EVENTS } from "./TriageEngine";
+import "./DoctorNeed.css";
 
 /**
  * Contextual Inputs Component
@@ -24,7 +24,7 @@ function ContextualInputs({ context, onUpdate, onNext, onBack }) {
   const handleChronicConditionToggle = (condId) => {
     const conditions = localContext.chronicConditions || [];
     const updated = conditions.includes(condId)
-      ? conditions.filter(c => c !== condId)
+      ? conditions.filter((c) => c !== condId)
       : [...conditions, condId];
     setLocalContext({ ...localContext, chronicConditions: updated });
   };
@@ -32,7 +32,7 @@ function ContextualInputs({ context, onUpdate, onNext, onBack }) {
   const handleRecentEventToggle = (eventId) => {
     const events = localContext.recentEvents || [];
     const updated = events.includes(eventId)
-      ? events.filter(e => e !== eventId)
+      ? events.filter((e) => e !== eventId)
       : [...events, eventId];
     setLocalContext({ ...localContext, recentEvents: updated });
   };
@@ -46,7 +46,9 @@ function ContextualInputs({ context, onUpdate, onNext, onBack }) {
     <div className="contextual-inputs">
       <div className="section-header">
         <h3>Step 3: Health Context (Optional)</h3>
-        <p className="section-subtitle">This helps us understand your risk better</p>
+        <p className="section-subtitle">
+          This helps us understand your risk better
+        </p>
       </div>
 
       <div className="context-form">
@@ -54,7 +56,7 @@ function ContextualInputs({ context, onUpdate, onNext, onBack }) {
         <div className="form-section">
           <h4 className="form-section-title">📅 Age Group</h4>
           <div className="option-group">
-            {AGE_GROUPS.map(ageGroup => (
+            {AGE_GROUPS.map((ageGroup) => (
               <label key={ageGroup.value} className="option-label">
                 <input
                   type="radio"
@@ -78,8 +80,8 @@ function ContextualInputs({ context, onUpdate, onNext, onBack }) {
                 type="radio"
                 name="gender"
                 value="male"
-                checked={localContext.gender === 'male'}
-                onChange={() => handleGenderChange('male')}
+                checked={localContext.gender === "male"}
+                onChange={() => handleGenderChange("male")}
               />
               <span>Male</span>
             </label>
@@ -88,8 +90,8 @@ function ContextualInputs({ context, onUpdate, onNext, onBack }) {
                 type="radio"
                 name="gender"
                 value="female"
-                checked={localContext.gender === 'female'}
-                onChange={() => handleGenderChange('female')}
+                checked={localContext.gender === "female"}
+                onChange={() => handleGenderChange("female")}
               />
               <span>Female</span>
             </label>
@@ -98,8 +100,8 @@ function ContextualInputs({ context, onUpdate, onNext, onBack }) {
                 type="radio"
                 name="gender"
                 value="other"
-                checked={localContext.gender === 'other'}
-                onChange={() => handleGenderChange('other')}
+                checked={localContext.gender === "other"}
+                onChange={() => handleGenderChange("other")}
               />
               <span>Other</span>
             </label>
@@ -108,8 +110,8 @@ function ContextualInputs({ context, onUpdate, onNext, onBack }) {
                 type="radio"
                 name="gender"
                 value="prefer_not"
-                checked={localContext.gender === 'prefer_not'}
-                onChange={() => handleGenderChange('prefer_not')}
+                checked={localContext.gender === "prefer_not"}
+                onChange={() => handleGenderChange("prefer_not")}
               />
               <span>Prefer not to say</span>
             </label>
@@ -117,9 +119,11 @@ function ContextualInputs({ context, onUpdate, onNext, onBack }) {
         </div>
 
         {/* Pregnancy Status */}
-        {(localContext.gender === 'female' || !localContext.gender) && (
+        {(localContext.gender === "female" || !localContext.gender) && (
           <div className="form-section">
-            <h4 className="form-section-title">🤰 Pregnancy Status (Optional)</h4>
+            <h4 className="form-section-title">
+              🤰 Pregnancy Status (Optional)
+            </h4>
             <div className="option-group">
               <label className="option-label">
                 <input
@@ -147,13 +151,17 @@ function ContextualInputs({ context, onUpdate, onNext, onBack }) {
 
         {/* Chronic Conditions */}
         <div className="form-section">
-          <h4 className="form-section-title">🏥 Chronic Conditions (Select all that apply)</h4>
+          <h4 className="form-section-title">
+            🏥 Chronic Conditions (Select all that apply)
+          </h4>
           <div className="checkbox-group">
-            {CHRONIC_CONDITIONS.map(condition => (
+            {CHRONIC_CONDITIONS.map((condition) => (
               <label key={condition.id} className="checkbox-label">
                 <input
                   type="checkbox"
-                  checked={(localContext.chronicConditions || []).includes(condition.id)}
+                  checked={(localContext.chronicConditions || []).includes(
+                    condition.id
+                  )}
                   onChange={() => handleChronicConditionToggle(condition.id)}
                 />
                 <span>{condition.label}</span>
@@ -164,9 +172,11 @@ function ContextualInputs({ context, onUpdate, onNext, onBack }) {
 
         {/* Recent Events */}
         <div className="form-section">
-          <h4 className="form-section-title">⚡ Recent Events (Select all that apply)</h4>
+          <h4 className="form-section-title">
+            ⚡ Recent Events (Select all that apply)
+          </h4>
           <div className="checkbox-group">
-            {RECENT_EVENTS.map(event => (
+            {RECENT_EVENTS.map((event) => (
               <label key={event.id} className="checkbox-label">
                 <input
                   type="checkbox"
