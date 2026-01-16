@@ -22,7 +22,7 @@ import RespiTrack from './health/RespiTrack'
 import BurnGuide from './health/BurnGuide'
 import DoctorChecklist from './health/DoctorChecklist'
 import SymptomSieve from './health/SymptomSieve'
-
+import SkinRashRiskDetector from './health/SkinRashRisk'
 function App() {
   return (
     <Router>
@@ -55,6 +55,7 @@ function App() {
           <Route path="/health/respi-track" element={<RespiTrack />} />
               <Route path="/health/doctor-checklist" element={<DoctorChecklist />} />
               <Route path="/health/symptom-sieve" element={<SymptomSieve />} />
+              <Route path="/health/skin-rash-risk" element={<SkinRashRiskDetector />} />
             </Routes>
           </Layout>
         } />

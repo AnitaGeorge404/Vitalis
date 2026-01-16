@@ -15,6 +15,7 @@
     "@mediapipe/drawing_utils": "^0.3.1675466124",
     "@mediapipe/pose": "^0.5.1675469404",
     "@supabase/supabase-js": "^2.90.1",
+    "@tensorflow/tfjs": "^4.22.0",
     "cors": "^2.8.5",
     "express": "^5.2.1",
     "leaflet": "^1.9.4",
