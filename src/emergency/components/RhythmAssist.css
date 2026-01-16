@@ -1,0 +1,146 @@
+/* Rhythm Assist Styles */
+.rhythm-assist {
+  background-color: var(--bg-primary);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  text-align: center;
+}
+
+.rhythm-assist h2 {
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+}
+
+.target-display {
+  margin-bottom: 1.5rem;
+}
+
+.target-bpm {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+}
+
+.target-bpm .value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--primary-health);
+}
+
+.visual-pulse {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 2rem auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pulse-circle {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(5, 150, 105, 0.2) 0%, transparent 70%);
+  border: 3px solid var(--primary-health);
+}
+
+.visual-pulse.active .pulse-circle {
+  animation: pulse 0.545s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.7;
+  }
+}
+
+.pulse-text {
+  font-size: 3rem;
+  color: var(--primary-health);
+  z-index: 1;
+}
+
+.metronome-button {
+  width: 100%;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--primary-health) 0%, #047857 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow-md);
+  margin-bottom: 1rem;
+}
+
+.metronome-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  background: linear-gradient(135deg, #10b981 0%, var(--primary-health) 100%);
+}
+
+.metronome-button.playing {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.metronome-button.playing:hover {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+}
+
+.beat-counter {
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  padding: 0.75rem;
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+}
+
+.rhythm-info {
+  text-align: left;
+  padding: 1rem;
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius);
+  border-left: 4px solid var(--primary-health);
+}
+
+.rhythm-info p {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .rhythm-assist {
+    padding: 1rem;
+  }
+
+  .rhythm-assist h2 {
+    font-size: 1.25rem;
+  }
+
+  .visual-pulse {
+    width: 100px;
+    height: 100px;
+  }
+
+  .pulse-text {
+    font-size: 2.5rem;
+  }
+}

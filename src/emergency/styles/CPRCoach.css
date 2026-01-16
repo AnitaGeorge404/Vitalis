@@ -1,0 +1,103 @@
+/* CPR Coach Main Styles */
+.cpr-coach-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.cpr-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.cpr-header h1 {
+  font-size: 3rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.cpr-subtitle {
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.disclaimer-banner {
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 1.1rem;
+  box-shadow: var(--shadow-md);
+  max-width: 900px;
+  margin: 1.5rem auto 0;
+}
+
+.cpr-main-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.cpr-camera-section {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.cpr-control-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.cpr-reset-button {
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow-md);
+}
+
+.cpr-reset-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+}
+
+.cpr-reset-button:active {
+  transform: translateY(0);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .cpr-main-content {
+    grid-template-columns: 1fr;
+  }
+
+  .cpr-header h1 {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .cpr-header h1 {
+    font-size: 2rem;
+  }
+
+  .cpr-subtitle {
+    font-size: 1rem;
+  }
+
+  .disclaimer-banner {
+    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+  }
+}

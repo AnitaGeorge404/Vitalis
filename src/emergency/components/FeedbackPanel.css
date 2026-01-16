@@ -1,0 +1,133 @@
+/* Feedback Panel Styles */
+.feedback-panel {
+  background-color: var(--bg-primary);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+}
+
+.feedback-panel h2 {
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.feedback-card {
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 1rem;
+  transition: var(--transition);
+  border: 2px solid transparent;
+}
+
+.posture-card.correct {
+  border-color: var(--primary-health);
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+}
+
+.posture-card.incorrect {
+  border-color: var(--primary-emergency);
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+}
+
+.posture-card.neutral {
+  border-color: var(--border-color);
+}
+
+.feedback-icon {
+  font-size: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 50px;
+}
+
+.feedback-content {
+  flex: 1;
+}
+
+.feedback-content h3 {
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.feedback-text {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin: 0;
+  font-weight: 500;
+}
+
+.stats-card {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 1.5rem;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--primary-health);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.rhythm-card.correct {
+  border-color: var(--primary-health);
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+}
+
+.rhythm-card.warning-fast,
+.rhythm-card.warning-slow {
+  border-color: #f59e0b;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+}
+
+.priority-message {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
+  padding: 1rem;
+  border-radius: var(--radius);
+  text-align: center;
+  font-weight: 600;
+  border: 2px solid #f59e0b;
+}
+
+@media (max-width: 768px) {
+  .feedback-panel {
+    padding: 1rem;
+  }
+
+  .feedback-panel h2 {
+    font-size: 1.25rem;
+  }
+
+  .feedback-card {
+    padding: 1rem;
+  }
+
+  .feedback-icon {
+    font-size: 2rem;
+    min-width: 40px;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+  }
+}
