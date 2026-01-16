@@ -32,16 +32,10 @@ function Emergency() {
       route: '/emergency/trauma-track'
     },
     {
-      title: 'Eye & Respiratory Track',
+      title: 'Respi Track',
       description: 'Emergency guidance for eye injuries and breathing problems',
       icon: '👁️',
       route: '/emergency/eye-respiratory-track'
-    },
-    {
-      title: 'Wound Watch',
-      description: 'Emergency wound assessment and immediate care guidance',
-      icon: '🔴',
-      route: '/emergency/wound-watch'
     },
     {
       title: 'Smart Emergency Contacts',

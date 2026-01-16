@@ -9,8 +9,7 @@ import CPRCoach from './emergency/CPRCoach'
 import ActionCards from './emergency/ActionCards'
 import AEDFinder from './emergency/AEDFinder'
 import TraumaTrack from './emergency/TraumaTrack'
-import EyeRespiratoryTrack from './emergency/EyeRespiratoryTrack'
-import WoundWatch from './emergency/WoundWatch'
+import RespiTrack from './emergency/RespiTrack'
 import EmergencyContacts from './emergency/EmergencyContacts'
 import VoiceGuidance from './emergency/VoiceGuidance'
 
@@ -35,8 +34,7 @@ function App() {
           <Route path="/emergency/action-cards" element={<ActionCards />} />
           <Route path="/emergency/aed-finder" element={<AEDFinder />} />
           <Route path="/emergency/trauma-track" element={<TraumaTrack />} />
-          <Route path="/emergency/eye-respiratory-track" element={<EyeRespiratoryTrack />} />
-          <Route path="/emergency/wound-watch" element={<WoundWatch />} />
+          <Route path="/emergency/eye-respiratory-track" element={<RespiTrack />} />
           <Route path="/emergency/contacts" element={<EmergencyContacts />} />
           <Route path="/emergency/voice-guidance" element={<VoiceGuidance />} />
           
