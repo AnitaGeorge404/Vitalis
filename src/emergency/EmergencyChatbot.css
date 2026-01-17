@@ -51,11 +51,43 @@
   margin-top: var(--space-sm);
 }
 
-.emergency-banner svg {
-  flex-shrink: 0;
+/* AI Status Badge */
+.ai-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-top: 0.75rem;
+  animation: fadeIn 0.3s ease;
 }
 
-/* Chat Main Area - Takes Most Space */
+.gemini-active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.fallback-mode {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fbbf24;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Chatbot Main Area - Takes Most Space */
 .chatbot-main {
   flex: 1;
   display: flex;

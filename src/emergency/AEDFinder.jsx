@@ -321,10 +321,10 @@ export default function AEDFinder() {
           </div>
 
           <div className="tabs">
-            <button className={`tab ${activeType === "HOSPITAL" ?  "active" : ""}`} onClick={() => setActiveType("HOSPITAL")}>🏥 Hospitals</button>
-            <button className={`tab ${activeType === "PHARMACY" ? "active" : ""}`} onClick={() => setActiveType("PHARMACY")}>💊 Pharmacies</button>
-            <button className={`tab ${activeType === "DOCTOR" ? "active" : ""}`} onClick={() => setActiveType("DOCTOR")}>👨‍⚕️ Physicians</button>
-            <button className={`tab ${activeType === "SAFE" ? "active" :  ""}`} onClick={() => setActiveType("SAFE")}>🛟 Community Help</button>
+            <button className={`tab ${activeType === "HOSPITAL" ?  "active" : ""}`} onClick={() => setActiveType("HOSPITAL")}>Hospitals</button>
+            <button className={`tab ${activeType === "PHARMACY" ? "active" : ""}`} onClick={() => setActiveType("PHARMACY")}>Pharmacies</button>
+            <button className={`tab ${activeType === "DOCTOR" ? "active" : ""}`} onClick={() => setActiveType("DOCTOR")}>Physicians</button>
+            <button className={`tab ${activeType === "SAFE" ? "active" :  ""}`} onClick={() => setActiveType("SAFE")}>Community Help</button>
           </div>
 
           <div className="layout" style={{ marginTop: 12 }}>

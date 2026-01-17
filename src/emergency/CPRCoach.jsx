@@ -60,7 +60,7 @@ function CPRCoach() {
       <div className="cpr-header">
         <div className="header-content">
           <div className="header-left">
-            <h1>🫀 CPR Coach - Emergency Training</h1>
+            <h1>CPR Coach - Emergency Training</h1>
             <p className="cpr-subtitle">Real-time guidance with AI pose detection</p>
           </div>
           <div className="header-actions">
@@ -108,67 +108,63 @@ function CPRCoach() {
       {/* Instructions & Guidelines - Bottom Section */}
       <div className="cpr-instructions-section">
         <div className="instructions-header">
-          <h2>📋 CPR Training Guide</h2>
+          <h2>CPR Training Guide</h2>
           <p>Follow these steps for effective CPR practice</p>
         </div>
 
         <div className="instructions-grid">
           <div className="instruction-card">
             <div className="instruction-number">1</div>
-            <h3>� Position Yourself</h3>
+            <h3>Position Yourself</h3>
             <p>Position yourself side-on with shoulders, elbows, wrists, and hips visible</p>
           </div>
 
           <div className="instruction-card">
             <div className="instruction-number">2</div>
-            <h3>🛋️ Prepare Surface</h3>
+            <h3>Prepare Surface</h3>
             <p>Use firm surface or CPR mannequin - never practice on real person</p>
           </div>
 
           <div className="instruction-card">
             <div className="instruction-number">3</div>
-            <h3>✋ Proper Position</h3>
+            <h3>Proper Position</h3>
             <p>Kneel beside surface, lock elbows, hands center of chest</p>
           </div>
 
           <div className="instruction-card">
             <div className="instruction-number">4</div>
-            <h3>🎯 Start Training</h3>
+            <h3>Start Training</h3>
             <p>Click "Start Training" above and follow real-time feedback</p>
           </div>
         </div>
 
         <div className="safety-guidelines">
-          <h3>⚠️ Critical Safety Information</h3>
+          <h3>Critical Safety Information</h3>
           <div className="guidelines-grid">
             <div className="guideline-item">
-              <span className="guideline-icon">🚫</span>
               <p><strong>Training Only:</strong> This is practice tool, not for real emergencies</p>
             </div>
             <div className="guideline-item">
-              <span className="guideline-icon">�</span>
               <p><strong>Never on People:</strong> Only use on mannequins or firm surfaces</p>
             </div>
             <div className="guideline-item">
-              <span className="guideline-icon">📚</span>
               <p><strong>Get Certified:</strong> Seek professional CPR certification training</p>
             </div>
             <div className="guideline-item">
-              <span className="guideline-icon">📞</span>
               <p><strong>Call 911 First:</strong> In real emergency, always call emergency services</p>
             </div>
           </div>
         </div>
 
         <div className="technique-tips">
-          <h3>💡 CPR Technique Tips</h3>
+          <h3>CPR Technique Guidelines</h3>
           <ul>
-            <li>✓ Compress at least 2 inches (5cm) deep on adults</li>
-            <li>✓ Allow full chest recoil between compressions</li>
-            <li>✓ Keep elbows locked and arms straight</li>
-            <li>✓ Use your body weight, not arm strength</li>
-            <li>✓ Maintain 100-120 compressions per minute</li>
-            <li>✓ Minimize interruptions in compressions</li>
+            <li>Compress at least 2 inches (5cm) deep on adults</li>
+            <li>Allow full chest recoil between compressions</li>
+            <li>Keep elbows locked and arms straight</li>
+            <li>Use your body weight, not arm strength</li>
+            <li>Maintain 100-120 compressions per minute</li>
+            <li>Minimize interruptions in compressions</li>
           </ul>
         </div>
       </div>

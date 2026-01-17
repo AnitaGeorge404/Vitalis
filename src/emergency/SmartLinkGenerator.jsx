@@ -107,25 +107,25 @@ function SmartLinkGenerator({ onClose, traumaEyeData = null }) {
     if (hasTraumaCritical || hasCriticalSymptoms || (hasHighSeverity && symptoms.length >= 2)) {
       return {
         level: 'CRITICAL',
-        explanation: '🚨 Immediate medical attention required. Call 911 or go to ER immediately.',
+        explanation: 'Immediate medical attention required. Call 911 or go to ER immediately.',
         color: '#dc2626'
       }
     } else if (hasHighSeverity || symptoms.length >= 3 || traumaEyeData?.severity === 'moderate') {
       return {
         level: 'URGENT',
-        explanation: '⚠️ Seek medical attention within 2-4 hours. Visit urgent care or ER.',
+        explanation: 'Seek medical attention within 2-4 hours. Visit urgent care or ER.',
         color: '#f59e0b'
       }
     } else if (symptoms.length >= 1) {
       return {
         level: 'MODERATE',
-        explanation: '💛 Medical attention recommended within 24 hours. Schedule doctor visit.',
+        explanation: 'Medical attention recommended within 24 hours. Schedule doctor visit.',
         color: '#eab308'
       }
     } else {
       return {
         level: 'LOW',
-        explanation: '✅ Monitor symptoms. Seek medical advice if condition worsens.',
+        explanation: 'Monitor symptoms. Seek medical advice if condition worsens.',
         color: '#16a34a'
       }
     }
@@ -294,7 +294,7 @@ function SmartLinkGenerator({ onClose, traumaEyeData = null }) {
                       checked={location.remoteArea}
                       onChange={(e) => setLocation({ ...location, remoteArea: e.target.checked })}
                     />
-                    <span>🏔️ Remote / Low Access Area</span>
+                    <span>Remote / Low Access Area</span>
                   </label>
                   <label className="checkbox-label">
                     <input
@@ -302,7 +302,7 @@ function SmartLinkGenerator({ onClose, traumaEyeData = null }) {
                       checked={location.industrialArea}
                       onChange={(e) => setLocation({ ...location, industrialArea: e.target.checked })}
                     />
-                    <span>🏭 Industrial Area</span>
+                    <span>Industrial Area</span>
                   </label>
                 </div>
               </div>
@@ -355,8 +355,8 @@ function SmartLinkGenerator({ onClose, traumaEyeData = null }) {
               </div>
 
               <div className="link-info">
-                <p>⏱️ <strong>Expires:</strong> {formatExpirationTime(generatedLink.expiresAt)}</p>
-                <p>🔒 <strong>Security:</strong> Read-only, no authentication required</p>
+                <p><strong>Expires:</strong> {formatExpirationTime(generatedLink.expiresAt)}</p>
+                <p><strong>Security:</strong> Read-only, no authentication required</p>
               </div>
 
               <button className="new-link-button" onClick={() => setGeneratedLink(null)}>

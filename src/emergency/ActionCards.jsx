@@ -172,22 +172,22 @@ const ActionCards = () => {
   };
 
   // Styles
-  const container = { minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: isMobile ? '8px' : '16px', background: '#f3f4f6', fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif', color: '#065f46' };
-  const shell = { width: '100%', maxWidth: isMobile ? '100%' : 720, margin: '0 auto' };
-  const sectionCard = { borderRadius: isMobile ? 10 : 12, padding: isMobile ? 12 : 16, background: '#ffffff', border: '1px solid #e5e7eb', boxShadow: '0 4px 12px rgba(15,118,110,0.06)' };
-  const topRow = { display: 'flex', flexWrap: 'wrap', gap: isMobile ? 8 : 12, marginBottom: isMobile ? 8 : 12, alignItems: 'flex-start', justifyContent: 'space-between', flexDirection: isMobile ? 'column' : 'row' };
-  const headingBlock = { borderBottom: '1px solid #bbf7d0', paddingBottom: 8, marginBottom: 6 };
-  const heading = { fontSize: isMobile ? 16 : 20, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#064e3b' };
-  const subText = { fontSize: isMobile ? 11 : 12, color: '#6b7280', maxWidth: isMobile ? '100%' : 520 };
-  const selectLabel = { fontSize: 11, color: '#6b7280', marginBottom: 4 };
-  const select = { fontSize: isMobile ? 12 : 13, padding: isMobile ? '6px 10px' : '8px 12px', borderRadius: 999, background: '#ecfdf5', color: '#065f46', border: '1px solid #a7f3d0', cursor: 'pointer', minWidth: isMobile ? 0 : 180, width: isMobile ? '100%' : 'auto' };
-  const stepsWrapper = { marginTop: isMobile ? 10 : 14, background: '#f9fafb', borderRadius: 14, padding: isMobile ? 10 : 12, border: '1px solid #e5e7eb' };
-  const stepRow = (isCurrent, isDisabled) => ({ display: 'flex', alignItems: 'flex-start', gap: 8, padding: isMobile ? '6px 8px' : '8px 10px', borderRadius: 10, marginBottom: 6, background: isCurrent ? '#ecfdf5' : 'transparent', border: isCurrent ? '1px solid #6ee7b7' : 'none', opacity: isDisabled ? 0.35 : 1, transition: 'all 0.2s ease' });
-  const stepNumber = (isCurrent) => ({ minWidth: isMobile ? 20 : 22, height: isMobile ? 20 : 22, borderRadius: 999, border: '1px solid #9ca3af', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: isMobile ? 10 : 11, background: isCurrent ? '#22c55e' : '#dcfce7', color: isCurrent ? '#f9fafb' : '#065f46' });
-  const stepText = { fontSize: isMobile ? 12 : 13, color: '#065f46', lineHeight: 1.55 };
-  const buttonsRow = { marginTop: isMobile ? 8 : 10, display: 'flex', flexWrap: 'wrap', gap: 6, fontSize: isMobile ? 11 : 12 };
-  const baseButton = { padding: isMobile ? '5px 8px' : '6px 10px', borderRadius: 999, fontWeight: 600, cursor: 'pointer', fontSize: isMobile ? 11 : 12 };
-  const infoBox = { marginTop: isMobile ? 10 : 12, fontSize: isMobile ? 10 : 11, color: '#6b7280', padding: isMobile ? '8px 10px' : '10px 12px', borderRadius: 10, background: '#ecfeff', border: '1px solid #bae6fd' };
+  const container = { minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: isMobile ? '10px' : '20px', background: '#f3f4f6', fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif', color: '#065f46' };
+  const shell = { width: '100%', maxWidth: isMobile ? '100%' : 760, margin: '0 auto' };
+  const sectionCard = { borderRadius: isMobile ? 12 : 16, padding: isMobile ? 16 : 24, background: '#ffffff', border: '2px solid #e5e7eb', boxShadow: '0 4px 16px rgba(15,118,110,0.08)' };
+  const topRow = { display: 'flex', flexWrap: 'wrap', gap: isMobile ? 12 : 16, marginBottom: isMobile ? 12 : 16, alignItems: 'flex-start', justifyContent: 'space-between', flexDirection: isMobile ? 'column' : 'row' };
+  const headingBlock = { borderBottom: '2px solid #bbf7d0', paddingBottom: 10, marginBottom: 8 };
+  const heading = { fontSize: isMobile ? 20 : 24, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#064e3b' };
+  const subText = { fontSize: isMobile ? 14 : 15, color: '#6b7280', maxWidth: isMobile ? '100%' : 560, lineHeight: 1.6 };
+  const selectLabel = { fontSize: 13, color: '#6b7280', marginBottom: 6, fontWeight: 600 };
+  const select = { fontSize: isMobile ? 15 : 16, padding: isMobile ? '10px 14px' : '12px 16px', borderRadius: 10, background: '#ecfdf5', color: '#065f46', border: '2px solid #a7f3d0', cursor: 'pointer', minWidth: isMobile ? 0 : 200, width: isMobile ? '100%' : 'auto', fontWeight: 600 };
+  const stepsWrapper = { marginTop: isMobile ? 14 : 20, background: '#f9fafb', borderRadius: 16, padding: isMobile ? 16 : 20, border: '2px solid #e5e7eb' };
+  const stepRow = (isCurrent, isDisabled) => ({ display: 'flex', alignItems: 'flex-start', gap: 12, padding: isMobile ? '10px 12px' : '14px 16px', borderRadius: 12, marginBottom: 10, background: isCurrent ? '#ecfdf5' : 'transparent', border: isCurrent ? '2px solid #6ee7b7' : 'none', opacity: isDisabled ? 0.4 : 1, transition: 'all 0.2s ease' });
+  const stepNumber = (isCurrent) => ({ minWidth: isMobile ? 28 : 32, height: isMobile ? 28 : 32, borderRadius: 999, border: '2px solid #9ca3af', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: isMobile ? 14 : 16, fontWeight: 700, background: isCurrent ? '#22c55e' : '#dcfce7', color: isCurrent ? '#ffffff' : '#065f46' });
+  const stepText = { fontSize: isMobile ? 16 : 18, color: '#065f46', lineHeight: 1.7, fontWeight: 500 };
+  const buttonsRow = { marginTop: isMobile ? 12 : 16, display: 'flex', flexWrap: 'wrap', gap: 10, fontSize: isMobile ? 14 : 15 };
+  const baseButton = { padding: isMobile ? '10px 16px' : '12px 20px', borderRadius: 10, fontWeight: 700, cursor: 'pointer', fontSize: isMobile ? 14 : 15 };
+  const infoBox = { marginTop: isMobile ? 14 : 16, fontSize: isMobile ? 13 : 14, color: '#6b7280', padding: isMobile ? '12px 16px' : '14px 18px', borderRadius: 12, background: '#ecfeff', border: '2px solid #bae6fd', lineHeight: 1.6 };
 
   return (
     <div style={container}>

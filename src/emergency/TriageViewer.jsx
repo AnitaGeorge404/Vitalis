@@ -106,7 +106,7 @@ function TriageViewer() {
           <button className="back-button-small" onClick={() => navigate('/emergency')}>
             <ArrowLeft size={20} />
           </button>
-          <h1>🏥 Emergency Triage Information</h1>
+          <h1>Emergency Triage Information</h1>
         </div>
 
         {/* Triage Level Badge */}
@@ -209,13 +209,13 @@ function TriageViewer() {
             <h3><MapPin size={20} /> Location Context</h3>
             <div className="location-tags">
               {triageData.location.highTraffic && (
-                <span className="location-tag">🚦 High Traffic Area</span>
+                <span className="location-tag">High Traffic Area</span>
               )}
               {triageData.location.remoteArea && (
-                <span className="location-tag">🏔️ Remote / Low Access Area</span>
+                <span className="location-tag">Remote / Low Access Area</span>
               )}
               {triageData.location.industrialArea && (
-                <span className="location-tag">🏭 Industrial Area</span>
+                <span className="location-tag">Industrial Area</span>
               )}
             </div>
           </div>
@@ -223,13 +223,13 @@ function TriageViewer() {
 
         {/* Emergency Actions */}
         <div className="action-card">
-          <h3>🚨 Recommended Actions</h3>
+          <h3>Recommended Actions</h3>
           {triageData.triage.level === 'CRITICAL' && (
             <div className="action-content critical">
               <p><strong>CALL 911 IMMEDIATELY</strong></p>
               <p>This is a life-threatening emergency requiring immediate medical intervention.</p>
               <button className="emergency-call-button" onClick={() => window.location.href = 'tel:911'}>
-                📞 Call 911 Now
+                Call 911 Now
               </button>
             </div>
           )}
@@ -238,7 +238,7 @@ function TriageViewer() {
               <p><strong>Seek Medical Attention Soon</strong></p>
               <p>Visit an urgent care facility or emergency room within 2-4 hours.</p>
               <button className="urgent-button" onClick={() => navigate('/emergency')}>
-                🏥 Find Nearest Facility
+                Find Nearest Facility
               </button>
             </div>
           )}
