@@ -1,8 +1,11 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout'
+import ProtectedRoute from './components/ProtectedRoute'
 import Home from './pages/Home'
 import Emergency from './pages/Emergency'
 import HealthCheck from './pages/HealthCheck'
+import Login from './pages/Login'
+import Signup from './pages/Signup'
 import TriageCardView from './emergency/TriageCardView'
 
 // Emergency feature pages
@@ -28,7 +31,9 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Public Route - No Layout */}
+        {/* Public Routes - No Layout */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
         <Route path="/triage/:token" element={<TriageCardView />} />
         
         {/* Main App Routes with Layout */}
@@ -38,9 +43,9 @@ function App() {
               {/* Main Pages */}
               <Route path="/" element={<Home />} />
               <Route path="/emergency" element={<Emergency />} />
-              <Route path="/health" element={<HealthCheck />} />
+              <Route path="/health" element={<ProtectedRoute><HealthCheck /></ProtectedRoute>} />
           
-          {/* Emergency Features */}
+          {/* Emergency Features - PUBLIC (No Login Required) */}
           <Route path="/emergency/vital-scan" element={<VitalScan />} />
           <Route path="/emergency/cpr" element={<CPRCoach />} />
           <Route path="/emergency/action-cards" element={<ActionCards />} />
@@ -50,14 +55,15 @@ function App() {
           <Route path="/emergency/contacts" element={<EmergencyContacts />} />
           <Route path="/emergency/chatbot" element={<EmergencyChatbot />} />
           <Route path="/emergency/triage/:linkId" element={<TriageViewer />} />
-          {/* Health Check Features */}
-          <Route path="/health/pill-identifier" element={<PillIdentifier />} />
-          <Route path="/health/wound-watch" element={<WoundWatchHealth />} />
-          <Route path="/health/burn-guide" element={<BurnGuide />} />
-          <Route path="/health/respi-track" element={<RespiTrack />} />
-              <Route path="/health/doctor-checklist" element={<DoctorChecklist />} />
-              <Route path="/health/symptom-sieve" element={<SymptomSieve />} />
-              <Route path="/health/skin-rash-risk" element={<SkinRashRiskDetector />} />
+          
+          {/* Health Check Features - PROTECTED (Login Required) */}
+          <Route path="/health/pill-identifier" element={<ProtectedRoute><PillIdentifier /></ProtectedRoute>} />
+          <Route path="/health/wound-watch" element={<ProtectedRoute><WoundWatchHealth /></ProtectedRoute>} />
+          <Route path="/health/burn-guide" element={<ProtectedRoute><BurnGuide /></ProtectedRoute>} />
+          <Route path="/health/respi-track" element={<ProtectedRoute><RespiTrack /></ProtectedRoute>} />
+              <Route path="/health/doctor-checklist" element={<ProtectedRoute><DoctorChecklist /></ProtectedRoute>} />
+              <Route path="/health/symptom-sieve" element={<ProtectedRoute><SymptomSieve /></ProtectedRoute>} />
+              <Route path="/health/skin-rash-risk" element={<ProtectedRoute><SkinRashRiskDetector /></ProtectedRoute>} />
             </Routes>
           </Layout>
         } />

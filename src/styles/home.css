@@ -85,6 +85,34 @@
   line-height: 1.6;
 }
 
+/* Mode Badges */
+.mode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.public-badge {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.login-badge {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fbbf24;
+}
+
+.authenticated-badge {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
 .mode-button {
   padding: 1rem 2rem;
   font-size: 1.1rem;
